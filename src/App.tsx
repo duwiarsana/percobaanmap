@@ -108,7 +108,7 @@ const MapController: React.FC<{
   const styleDistrict = (feature: any) => {
     return {
       fillColor: '#10b981',
-      weight: 1.5,
+      weight: 0.5, // Thinner lines
       opacity: 1,
       color: 'white',
       dashArray: '3',
@@ -139,7 +139,7 @@ const MapController: React.FC<{
       mouseover: (e: any) => {
         const layer = e.target;
         layer.setStyle({
-          weight: 2.5,
+          weight: 1, // Thinner hover line
           color: 'white',
           dashArray: '',
           fillOpacity: 0.9,
@@ -153,7 +153,7 @@ const MapController: React.FC<{
       mouseout: (e: any) => {
         const layer = e.target;
         layer.setStyle({
-          weight: 1,
+          weight: 0.5, // Thinner lines
           color: 'white',
           dashArray: '3',
           fillOpacity: 0.7
@@ -273,7 +273,7 @@ function App() {
   const styleFeature = (feature: any) => {
     return {
       fillColor: getColor(feature.properties.ID || 0),
-      weight: 2,
+      weight: 0.5, // Thinner lines
       opacity: 1,
       color: 'white',
       dashArray: '3',
@@ -307,7 +307,7 @@ function App() {
       mouseover: (e: any) => {
         const layer = e.target;
         layer.setStyle({
-          weight: 3,
+          weight: 1, // Thinner hover line
           color: 'white',
           dashArray: '',
           fillOpacity: 0.9,
@@ -317,7 +317,7 @@ function App() {
       mouseout: (e: any) => {
         const layer = e.target;
         layer.setStyle({
-          weight: 2,
+          weight: 0.5, // Thinner lines
           color: 'white',
           dashArray: '3',
           fillOpacity: 0.7,
