@@ -336,9 +336,31 @@ function App() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             
-            {geoJsonData && (
+            {/* Only show all provinces when no province is selected */}
+            {geoJsonData && !selectedProvince && (
               <GeoJSON 
                 data={geoJsonData} 
+                style={styleFeature}
+                onEachFeature={onEachFeature}
+              />
+            )}
+            
+            {/* When a province is selected, only show that province */}
+            {geoJsonData && selectedProvince && (
+              <GeoJSON 
+                key={`selected-${selectedProvince}`}
+                data={{
+                  type: "FeatureCollection",
+                  features: geoJsonData.features.filter(feature => {
+                    const provinceName = feature.properties.prov_name || 
+                                        feature.properties.Propinsi || 
+                                        feature.properties.NAME || 
+                                        feature.properties.name || 
+                                        feature.properties.NAMA || 
+                                        '';
+                    return provinceName === selectedProvince;
+                  })
+                } as GeoJSONData}
                 style={styleFeature}
                 onEachFeature={onEachFeature}
               />
