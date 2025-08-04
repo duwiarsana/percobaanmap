@@ -108,11 +108,12 @@ const MapController: React.FC<{
   const styleDistrict = (feature: any) => {
     return {
       fillColor: '#10b981',
-      weight: 1,
+      weight: 1.5,
       opacity: 1,
       color: 'white',
       dashArray: '3',
-      fillOpacity: 0.7
+      fillOpacity: 0.7,
+      zIndex: 1000 // Ensure districts are always on top
     };
   };
   
@@ -138,11 +139,15 @@ const MapController: React.FC<{
       mouseover: (e: any) => {
         const layer = e.target;
         layer.setStyle({
-          weight: 2,
+          weight: 2.5,
           color: '#666',
           dashArray: '',
-          fillOpacity: 0.9
+          fillOpacity: 0.9,
+          zIndex: 1500 // Even higher z-index on hover
         });
+        
+        // Force this layer to the front
+        if (!layer._map) return;
         layer.bringToFront();
       },
       mouseout: (e: any) => {
@@ -165,6 +170,18 @@ const MapController: React.FC<{
           data={districtData} 
           style={styleDistrict}
           onEachFeature={onEachDistrict}
+          // zIndex handled in style function
+          eventHandlers={{
+            add: (e) => {
+              // Force district layer to front when added to map
+              const layer = e.target;
+              if (layer && layer.bringToFront) {
+                setTimeout(() => {
+                  layer.bringToFront();
+                }, 100);
+              }
+            }
+          }}
         />
       )}
       {districtLoading && (
@@ -260,7 +277,8 @@ function App() {
       opacity: 1,
       color: 'white',
       dashArray: '3',
-      fillOpacity: 0.7
+      fillOpacity: 0.7,
+      zIndex: 500 // Lower z-index than districts
     };
   };
 
@@ -292,9 +310,9 @@ function App() {
           weight: 3,
           color: '#666',
           dashArray: '',
-          fillOpacity: 0.9
+          fillOpacity: 0.9,
+          zIndex: 600 // Higher than normal province but lower than districts
         });
-        layer.bringToFront();
       },
       mouseout: (e: any) => {
         const layer = e.target;
@@ -302,8 +320,25 @@ function App() {
           weight: 2,
           color: 'white',
           dashArray: '3',
-          fillOpacity: 0.7
+          fillOpacity: 0.7,
+          zIndex: 500 // Lower z-index than districts
         });
+        
+        // Make sure districts stay on top if they exist
+        if (selectedProvince) {
+          const map = layer._map;
+          if (map) {
+            // Force all district layers to front
+            map.eachLayer((mapLayer: any) => {
+              if (mapLayer.feature && 
+                  mapLayer.feature.properties && 
+                  (mapLayer.feature.properties.kab_name || 
+                   mapLayer.feature.properties.KAB_NAME)) {
+                mapLayer.bringToFront();
+              }
+            });
+          }
+        }
       },
       click: (e: any) => {
         // Set the selected province and zoom to it
