@@ -118,6 +118,27 @@
   letter-spacing: 0.3px;
 }
 
+.selected-district-info {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 5px 15px;
+  border-radius: 4px;
+  z-index: 1500;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.selected-district-info h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
 .district-loading, .district-error {
   position: absolute;
   bottom: 20px;

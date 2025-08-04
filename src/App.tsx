@@ -28,8 +28,9 @@ const MapController: React.FC<{
   const [districtData, setDistrictData] = useState<GeoJSONData | null>(null);
   const [districtLoading, setDistrictLoading] = useState<boolean>(false);
   const [districtError, setDistrictError] = useState<string | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   
-  // Add click handler to map to reset province selection when clicking outside
+  // Add click handler to map to reset province and district selection when clicking outside
   useEffect(() => {
     if (!map) return;
     
@@ -38,9 +39,10 @@ const MapController: React.FC<{
       const clickedOnFeature = e.originalEvent.target && 
                               (e.originalEvent.target as HTMLElement).classList.contains('leaflet-interactive');
       
-      // If not clicked on a feature, reset the selected province
+      // If not clicked on a feature, reset the selected province and district
       if (!clickedOnFeature) {
         setSelectedProvince(null);
+        setSelectedDistrict(null);
       }
     };
     
@@ -49,7 +51,7 @@ const MapController: React.FC<{
     return () => {
       map.off('click', handleMapClick);
     };
-  }, [map, setSelectedProvince]);
+  }, [map, setSelectedProvince, setSelectedDistrict]);
   
   // Load district data when a province is selected
   useEffect(() => {
@@ -106,14 +108,17 @@ const MapController: React.FC<{
   
   // Style for district features
   const styleDistrict = (feature: any) => {
+    const districtName = feature.properties.kab_name || feature.properties.KAB_NAME;
+    const isSelected = selectedDistrict === districtName;
+    
     return {
-      fillColor: '#4a4a4a', // Darker gray color
-      weight: 0.8, // Slightly thicker lines
+      fillColor: isSelected ? '#2d2d2d' : '#4a4a4a', // Darker color for selected district
+      weight: isSelected ? 1.5 : 0.8, // Thicker lines for selected district
       opacity: 1,
       color: 'white',
       dashArray: '', // Solid lines, not dashed
-      fillOpacity: 0.7,
-      zIndex: 1000 // Ensure districts are always on top
+      fillOpacity: isSelected ? 0.9 : 0.7, // More opaque for selected district
+      zIndex: isSelected ? 1200 : 1000 // Higher z-index for selected district
     };
   };
   
@@ -134,7 +139,7 @@ const MapController: React.FC<{
       offset: [0, -10] // Offset to position above cursor
     });
     
-    // Add hover effect
+    // Add hover effect and click handler
     layer.on({
       mouseover: (e: any) => {
         const layer = e.target;
@@ -158,15 +163,34 @@ const MapController: React.FC<{
           dashArray: '', // Solid lines, not dashed
           fillOpacity: 0.7
         });
+      },
+      click: (e: any) => {
+        const map = e.target._map;
+        const bounds = e.target.getBounds();
+        const districtName = e.target.feature.properties.kab_name || e.target.feature.properties.KAB_NAME;
+        
+        // Set the selected district
+        setSelectedDistrict(districtName);
+        
+        // Zoom to the clicked district
+        map.fitBounds(bounds, {
+          padding: [50, 50], // Add some padding around the district
+          maxZoom: 10 // Limit maximum zoom level
+        });
       }
     });
   };
   
   return (
     <>
+      {selectedDistrict && (
+        <div className="selected-district-info">
+          <h3>{selectedDistrict}</h3>
+        </div>
+      )}
       {districtData && selectedProvince && (
         <GeoJSON 
-          key={`districts-${selectedProvince}`}
+          key={`districts-${selectedProvince}-${selectedDistrict}`}
           data={districtData} 
           style={styleDistrict}
           onEachFeature={onEachDistrict}
