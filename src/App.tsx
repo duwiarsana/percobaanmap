@@ -107,7 +107,7 @@ const MapController: React.FC<{
   // Style for district features
   const styleDistrict = (feature: any) => {
     return {
-      fillColor: '#10b981',
+      fillColor: '#6c6c6c', // Medium gray color
       weight: 0.8, // Slightly thicker lines
       opacity: 1,
       color: 'white',
@@ -256,15 +256,15 @@ function App() {
     fetchGeoJson();
   }, []);
 
-  // Function to get color based on province ID
+  // Function to get color based on province ID - using gray shades
   const getColor = (id: number) => {
     const colors = [
-      '#66c2a5', '#fc8d62', '#8da0cb', '#e78ac3', '#a6d854', 
-      '#ffd92f', '#e5c494', '#b3b3b3', '#8dd3c7', '#bebada', 
-      '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', 
-      '#d9d9d9', '#bc80bd', '#ccebc5', '#ffed6f', '#ffffb3',
-      '#1f78b4', '#33a02c', '#e31a1c', '#ff7f00', '#6a3d9a',
-      '#b15928', '#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f'
+      '#f7f7f7', '#e5e5e5', '#d4d4d4', '#c3c3c3', '#b2b2b2', 
+      '#a0a0a0', '#8f8f8f', '#7e7e7e', '#6c6c6c', '#5b5b5b', 
+      '#4a4a4a', '#393939', '#282828', '#171717', '#4d4d4d',
+      '#5a5a5a', '#676767', '#747474', '#818181', '#8e8e8e',
+      '#9b9b9b', '#a8a8a8', '#b5b5b5', '#c2c2c2', '#cfcfcf',
+      '#dcdcdc', '#e9e9e9', '#f6f6f6', '#ebebeb', '#dedede'
     ];
     return colors[id % colors.length];
   };
