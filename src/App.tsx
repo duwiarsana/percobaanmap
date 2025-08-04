@@ -124,11 +124,13 @@ const MapController: React.FC<{
                         feature.properties.NAME || 
                         'Unknown District';
     
-    // Add tooltip with district name
+    // Add tooltip with district name - follow cursor and appear above it
     layer.bindTooltip(districtName, {
       permanent: false,
-      direction: 'center',
-      className: 'district-tooltip'
+      direction: 'top',
+      className: 'district-tooltip',
+      sticky: true, // Makes tooltip follow the mouse
+      offset: [0, -10] // Offset to position above cursor
     });
     
     // Add hover effect
@@ -271,11 +273,13 @@ function App() {
                         feature.properties.NAMA || 
                         'Unknown Province';
     
-    // Add tooltip with province name - only show on hover
+    // Add tooltip with province name - only show on hover and follow cursor
     layer.bindTooltip(provinceName, {
       permanent: false,
-      direction: 'center',
-      className: 'province-tooltip'
+      direction: 'top',
+      className: 'province-tooltip',
+      sticky: true, // Makes tooltip follow the mouse
+      offset: [0, -10] // Offset to position above cursor
     });
     
     // No popup needed
