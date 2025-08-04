@@ -108,7 +108,7 @@ const MapController: React.FC<{
   const styleDistrict = (feature: any) => {
     return {
       fillColor: '#10b981',
-      weight: 0.5, // Thinner lines
+      weight: 0.8, // Slightly thicker lines
       opacity: 1,
       color: 'white',
       dashArray: '', // Solid lines, not dashed
@@ -139,7 +139,7 @@ const MapController: React.FC<{
       mouseover: (e: any) => {
         const layer = e.target;
         layer.setStyle({
-          weight: 1, // Thinner hover line
+          weight: 1.2, // Slightly thicker hover line
           color: 'white',
           dashArray: '',
           fillOpacity: 0.9,
@@ -153,7 +153,7 @@ const MapController: React.FC<{
       mouseout: (e: any) => {
         const layer = e.target;
         layer.setStyle({
-          weight: 0.5, // Thinner lines
+          weight: 0.8, // Slightly thicker lines
           color: 'white',
           dashArray: '', // Solid lines, not dashed
           fillOpacity: 0.7
@@ -273,7 +273,7 @@ function App() {
   const styleFeature = (feature: any) => {
     return {
       fillColor: getColor(feature.properties.ID || 0),
-      weight: 0.5, // Thinner lines
+      weight: 0.8, // Slightly thicker lines
       opacity: 1,
       color: 'white',
       dashArray: '', // Solid lines, not dashed
@@ -307,7 +307,7 @@ function App() {
       mouseover: (e: any) => {
         const layer = e.target;
         layer.setStyle({
-          weight: 1, // Thinner hover line
+          weight: 1.2, // Slightly thicker hover line
           color: 'white',
           dashArray: '',
           fillOpacity: 0.9,
@@ -317,7 +317,7 @@ function App() {
       mouseout: (e: any) => {
         const layer = e.target;
         layer.setStyle({
-          weight: 0.5, // Thinner lines
+          weight: 0.8, // Slightly thicker lines
           color: 'white',
           dashArray: '', // Solid lines, not dashed
           fillOpacity: 0.7,
