@@ -140,7 +140,7 @@ const MapController: React.FC<{
         const layer = e.target;
         layer.setStyle({
           weight: 2.5,
-          color: '#666',
+          color: 'white',
           dashArray: '',
           fillOpacity: 0.9,
           zIndex: 1500 // Even higher z-index on hover
@@ -308,7 +308,7 @@ function App() {
         const layer = e.target;
         layer.setStyle({
           weight: 3,
-          color: '#666',
+          color: 'white',
           dashArray: '',
           fillOpacity: 0.9,
           zIndex: 600 // Higher than normal province but lower than districts
