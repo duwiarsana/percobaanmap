@@ -111,7 +111,7 @@ const MapController: React.FC<{
       weight: 0.5, // Thinner lines
       opacity: 1,
       color: 'white',
-      dashArray: '3',
+      dashArray: '', // Solid lines, not dashed
       fillOpacity: 0.7,
       zIndex: 1000 // Ensure districts are always on top
     };
@@ -155,7 +155,7 @@ const MapController: React.FC<{
         layer.setStyle({
           weight: 0.5, // Thinner lines
           color: 'white',
-          dashArray: '3',
+          dashArray: '', // Solid lines, not dashed
           fillOpacity: 0.7
         });
       }
@@ -276,7 +276,7 @@ function App() {
       weight: 0.5, // Thinner lines
       opacity: 1,
       color: 'white',
-      dashArray: '3',
+      dashArray: '', // Solid lines, not dashed
       fillOpacity: 0.7,
       zIndex: 500 // Lower z-index than districts
     };
@@ -319,7 +319,7 @@ function App() {
         layer.setStyle({
           weight: 0.5, // Thinner lines
           color: 'white',
-          dashArray: '3',
+          dashArray: '', // Solid lines, not dashed
           fillOpacity: 0.7,
           zIndex: 500 // Lower z-index than districts
         });
