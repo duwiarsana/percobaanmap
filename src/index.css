@@ -11,3 +11,93 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Custom tooltip styles */
+.custom-tooltip {
+  background-color: rgba(0, 0, 0, 0.8);
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+.district-tooltip {
+  padding: 4px 8px;
+  font-size: 16px;
+  font-weight: 700;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+/* Remove the default Leaflet tooltip arrow */
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+  display: none !important;
+}
+
+/* Ensure district paths are interactive */
+.district-path {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure all SVG paths in the map are interactive */
+.leaflet-overlay-pane path {
+  pointer-events: auto !important;
+  cursor: pointer;
+}
+
+/* Loading indicator styles */
+.map-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.map-loading-indicator {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.loading-text {
+  display: inline-block;
+  position: relative;
+  padding-right: 20px;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.custom-tooltip::before {
+  border-top-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Map container styles */
+.leaflet-container {
+  height: 100vh;
+  width: 100%;
+  z-index: 1;
+}
