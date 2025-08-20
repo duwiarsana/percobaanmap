@@ -297,6 +297,736 @@ const MapController: React.FC<{
     return () => clearTimeout(loadingTimeout);
   }, [selectedDistrictId, isZooming]);
 
+  // Fungsi khusus untuk memuat data kecamatan Jembrana
+  const loadJembranaSubdistrictData = async (districtId: string | number) => {
+    console.log(`Loading Jembrana subdistrict data with ID: ${districtId}`);
+    try {
+      // Define the kecamatan files for Jembrana
+      const kecamatanFiles = [
+        "id5101010_melaya",
+        "id5101020_negara",
+        "id5101021_jembrana",
+        "id5101030_mendoyo",
+        "id5101040_pekutatan"
+      ];
+      
+      // Create a combined GeoJSON with all kecamatan
+      const combinedFeatures: any[] = [];
+      let loadedCount = 0;
+      
+      // Try to load each kecamatan file
+      for (const kecamatan of kecamatanFiles) {
+        try {
+          console.log(`Loading kecamatan: ${kecamatan}`);
+          // Coba beberapa path yang mungkin untuk file kecamatan
+          let url = `/data/bali/jembrana/${kecamatan}.geojson`;
+          console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
+          let response = await fetch(url);
+          console.log(`First attempt status: ${response.status} ${response.statusText}`);
+          
+          // Jika tidak berhasil, coba path alternatif
+          if (!response.ok) {
+            url = `/indonesia-district-master 3/id51_bali/id5101_jembrana/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Second attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Second attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          // Jika masih tidak berhasil, coba path alternatif lain
+          if (!response.ok) {
+            url = `/id51_bali/id5101_jembrana/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Third attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Third attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
+          if (!response.ok) {
+            url = `/geojsonKecamatan/id51_bali/id5101_jembrana/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Fourth attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Fourth attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          if (!response.ok) {
+            console.error(`[${new Date().toISOString()}] All attempts failed for ${kecamatan}. HTTP error ${response.status}: ${response.statusText}`);
+            console.error(`URL attempted: ${url}`);
+            continue;
+          } else {
+            console.log(`[${new Date().toISOString()}] Successfully loaded ${kecamatan} from ${url}`);
+          }
+          
+          let data;
+          try {
+            const text = await response.text();
+            if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+              console.error(`Received HTML instead of JSON for ${kecamatan}`);
+              continue;
+            }
+            data = JSON.parse(text);
+          } catch (parseError) {
+            console.error(`JSON parse error for ${kecamatan}:`, parseError);
+            continue;
+          }
+          
+          if (!data || !data.features || data.features.length === 0) {
+            console.error(`No features found in ${kecamatan} file`);
+            continue;
+          }
+          
+          // Add kecamatan name and district_code to each feature for consistency
+          const enhancedFeatures = data.features.map((feature: any) => {
+            if (!feature.properties) {
+              feature.properties = {};
+            }
+            
+            // Extract kecamatan name from filename and format it nicely
+            const kecamatanName = kecamatan.split('_').slice(1).join(' ')
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+            
+            // Set all possible property names for maximum compatibility
+            feature.properties.kecamatan = kecamatanName;
+            feature.properties.kec_name = kecamatanName;
+            feature.properties.KECAMATAN = kecamatanName;
+            feature.properties.NAMA = kecamatanName;
+            feature.properties.nama = kecamatanName;
+            feature.properties.name = kecamatanName;
+            feature.properties.NAME = kecamatanName;
+            
+            // Add district code for filtering
+            feature.properties.district_code = "5101";
+            feature.properties.kab_id = "5101";
+            feature.properties.kabupaten_id = "5101";
+            feature.properties.KABUPATEN_ID = "5101";
+            feature.properties.ID_KABUPATEN = "5101";
+            
+            return feature;
+          });
+          
+          // Add the features to our combined collection
+          combinedFeatures.push(...enhancedFeatures);
+          loadedCount++;
+        } catch (error) {
+          console.error(`Error processing ${kecamatan}:`, error);
+        }
+      }
+      
+      // If we loaded at least one kecamatan file, use the combined data
+      if (combinedFeatures.length > 0) {
+        const combinedData: GeoJSONData = {
+          type: "FeatureCollection",
+          features: combinedFeatures
+        };
+        setSubdistrictData(combinedData);
+        console.log(`Successfully loaded ${combinedFeatures.length} kecamatan features for Jembrana from ${loadedCount} files`);
+        return Promise.resolve();
+      }
+      
+      // If no kecamatan files were loaded, fall back to the district file
+      console.log('No kecamatan files loaded for Jembrana, falling back to district file');
+      
+      // Coba beberapa path yang mungkin untuk file district
+      let url = '/data/bali/jembrana/id5101_jembrana.geojson';
+      console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
+      let response = await fetch(url);
+      console.log(`First district attempt status: ${response.status} ${response.statusText}`);
+      
+      // Jika tidak berhasil, coba path alternatif
+      if (!response.ok) {
+        url = '/indonesia-district-master 3/id51_bali/id5101_jembrana/id5101_jembrana.geojson';
+        console.log(`[${new Date().toISOString()}] Second attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Second district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      // Jika masih tidak berhasil, coba path alternatif lain
+      if (!response.ok) {
+        url = '/id51_bali/id5101_jembrana/id5101_jembrana.geojson';
+        console.log(`[${new Date().toISOString()}] Third attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Third district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
+      if (!response.ok) {
+        url = '/geojsonKecamatan/id51_bali/id5101_jembrana/id5101_jembrana.geojson';
+        console.log(`[${new Date().toISOString()}] Fourth attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Fourth district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      if (!response.ok) throw new Error('Jembrana district file not found');
+      const text = await response.text();
+      
+      if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+        throw new Error('Received HTML instead of JSON');
+      }
+      
+      const data = JSON.parse(text);
+      setSubdistrictData(data);
+      console.log('Successfully loaded Jembrana district data');
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error loading Jembrana subdistrict data:", error);
+      // Set empty GeoJSON to avoid crashes
+      setSubdistrictData({
+        type: "FeatureCollection",
+        features: []
+      });
+      return Promise.reject(error);
+    }
+  };
+  
+  // Fungsi khusus untuk memuat data kecamatan Buleleng
+  const loadBulelengSubdistrictData = async (districtId: string | number) => {
+    console.log(`Loading Buleleng subdistrict data with ID: ${districtId}`);
+    try {
+      // Define the kecamatan files for Buleleng
+      const kecamatanFiles = [
+        "id5108010_gerokgak",
+        "id5108020_seririt",
+        "id5108030_busungbiu",
+        "id5108040_banjar",
+        "id5108050_sukasada",
+        "id5108060_buleleng",
+        "id5108070_sawan",
+        "id5108080_kubutambahan",
+        "id5108090_tejakula"
+      ];
+      
+      // Create a combined GeoJSON with all kecamatan
+      const combinedFeatures: any[] = [];
+      let loadedCount = 0;
+      
+      // Try to load each kecamatan file
+      for (const kecamatan of kecamatanFiles) {
+        try {
+          console.log(`Loading kecamatan: ${kecamatan}`);
+          // Coba beberapa path yang mungkin untuk file kecamatan
+          let url = `/data/bali/buleleng/${kecamatan}.geojson`;
+          console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
+          let response = await fetch(url);
+          console.log(`First attempt status: ${response.status} ${response.statusText}`);
+          
+          // Jika tidak berhasil, coba path alternatif
+          if (!response.ok) {
+            url = `/indonesia-district-master 3/id51_bali/id5108_buleleng/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Second attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Second attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          // Jika masih tidak berhasil, coba path alternatif lain
+          if (!response.ok) {
+            url = `/id51_bali/id5108_buleleng/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Third attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Third attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
+          if (!response.ok) {
+            url = `/geojsonKecamatan/id51_bali/id5108_buleleng/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Fourth attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Fourth attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          if (!response.ok) {
+            console.error(`[${new Date().toISOString()}] All attempts failed for ${kecamatan}. HTTP error ${response.status}: ${response.statusText}`);
+            console.error(`URL attempted: ${url}`);
+            continue;
+          } else {
+            console.log(`[${new Date().toISOString()}] Successfully loaded ${kecamatan} from ${url}`);
+          }
+          
+          let data;
+          try {
+            const text = await response.text();
+            if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+              console.error(`Received HTML instead of JSON for ${kecamatan}`);
+              continue;
+            }
+            data = JSON.parse(text);
+          } catch (parseError) {
+            console.error(`JSON parse error for ${kecamatan}:`, parseError);
+            continue;
+          }
+          
+          if (!data || !data.features || data.features.length === 0) {
+            console.error(`No features found in ${kecamatan} file`);
+            continue;
+          }
+          
+          // Add kecamatan name and district_code to each feature for consistency
+          const enhancedFeatures = data.features.map((feature: any) => {
+            if (!feature.properties) {
+              feature.properties = {};
+            }
+            
+            // Extract kecamatan name from filename and format it nicely
+            const kecamatanName = kecamatan.split('_').slice(1).join(' ')
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+            
+            // Set all possible property names for maximum compatibility
+            feature.properties.kecamatan = kecamatanName;
+            feature.properties.kec_name = kecamatanName;
+            feature.properties.KECAMATAN = kecamatanName;
+            feature.properties.NAMA = kecamatanName;
+            feature.properties.nama = kecamatanName;
+            feature.properties.name = kecamatanName;
+            feature.properties.NAME = kecamatanName;
+            
+            // Add district code for filtering
+            feature.properties.district_code = "5108";
+            feature.properties.kab_id = "5108";
+            feature.properties.kabupaten_id = "5108";
+            feature.properties.KABUPATEN_ID = "5108";
+            feature.properties.ID_KABUPATEN = "5108";
+            
+            return feature;
+          });
+          
+          // Add the features to our combined collection
+          combinedFeatures.push(...enhancedFeatures);
+          loadedCount++;
+        } catch (error) {
+          console.error(`Error processing ${kecamatan}:`, error);
+        }
+      }
+      
+      // If we loaded at least one kecamatan file, use the combined data
+      if (combinedFeatures.length > 0) {
+        const combinedData: GeoJSONData = {
+          type: "FeatureCollection",
+          features: combinedFeatures
+        };
+        setSubdistrictData(combinedData);
+        console.log(`Successfully loaded ${combinedFeatures.length} kecamatan features for Buleleng from ${loadedCount} files`);
+        return Promise.resolve();
+      }
+      
+      // If no kecamatan files were loaded, fall back to the district file
+      console.log('No kecamatan files loaded for Buleleng, falling back to district file');
+      
+      // Coba beberapa path yang mungkin untuk file district
+      let url = '/data/bali/buleleng/id5108_buleleng.geojson';
+      console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
+      let response = await fetch(url);
+      console.log(`First district attempt status: ${response.status} ${response.statusText}`);
+      
+      // Jika tidak berhasil, coba path alternatif
+      if (!response.ok) {
+        url = '/indonesia-district-master 3/id51_bali/id5108_buleleng/id5108_buleleng.geojson';
+        console.log(`[${new Date().toISOString()}] Second attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Second district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      // Jika masih tidak berhasil, coba path alternatif lain
+      if (!response.ok) {
+        url = '/id51_bali/id5108_buleleng/id5108_buleleng.geojson';
+        console.log(`[${new Date().toISOString()}] Third attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Third district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
+      if (!response.ok) {
+        url = '/geojsonKecamatan/id51_bali/id5108_buleleng/id5108_buleleng.geojson';
+        console.log(`[${new Date().toISOString()}] Fourth attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Fourth district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      if (!response.ok) throw new Error('Buleleng district file not found');
+      const text = await response.text();
+      
+      if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+        throw new Error('Received HTML instead of JSON');
+      }
+      
+      const data = JSON.parse(text);
+      setSubdistrictData(data);
+      console.log('Successfully loaded Buleleng district data');
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error loading Buleleng subdistrict data:", error);
+      // Set empty GeoJSON to avoid crashes
+      setSubdistrictData({
+        type: "FeatureCollection",
+        features: []
+      });
+      return Promise.reject(error);
+    }
+  };
+  
+  // Fungsi khusus untuk memuat data kecamatan Klungkung
+  const loadKlungkungSubdistrictData = async (districtId: string | number) => {
+    console.log(`Loading Klungkung subdistrict data with ID: ${districtId}`);
+    try {
+      // Define the kecamatan files for Klungkung
+      const kecamatanFiles = [
+        "id5105010_nusapenida",
+        "id5105020_banjarangkan",
+        "id5105030_klungkung",
+        "id5105040_dawan"
+      ];
+      
+      // Create a combined GeoJSON with all kecamatan
+      const combinedFeatures: any[] = [];
+      let loadedCount = 0;
+      
+      // Try to load each kecamatan file
+      for (const kecamatan of kecamatanFiles) {
+        try {
+          console.log(`Loading kecamatan: ${kecamatan}`);
+          // Coba beberapa path yang mungkin untuk file kecamatan
+          let url = `/data/bali/klungkung/${kecamatan}.geojson`;
+          console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
+          let response = await fetch(url);
+          console.log(`First attempt status: ${response.status} ${response.statusText}`);
+          
+          // Jika tidak berhasil, coba path alternatif
+          if (!response.ok) {
+            url = `/indonesia-district-master 3/id51_bali/id5105_klungkung/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Second attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Second attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          // Jika masih tidak berhasil, coba path alternatif lain
+          if (!response.ok) {
+            url = `/id51_bali/id5105_klungkung/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Third attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Third attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
+          if (!response.ok) {
+            url = `/geojsonKecamatan/id51_bali/id5105_klungkung/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Fourth attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Fourth attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          if (!response.ok) {
+            console.error(`[${new Date().toISOString()}] All attempts failed for ${kecamatan}. HTTP error ${response.status}: ${response.statusText}`);
+            console.error(`URL attempted: ${url}`);
+            continue;
+          } else {
+            console.log(`[${new Date().toISOString()}] Successfully loaded ${kecamatan} from ${url}`);
+          }
+          
+          let data;
+          try {
+            const text = await response.text();
+            if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+              console.error(`Received HTML instead of JSON for ${kecamatan}`);
+              continue;
+            }
+            data = JSON.parse(text);
+          } catch (parseError) {
+            console.error(`JSON parse error for ${kecamatan}:`, parseError);
+            continue;
+          }
+          
+          if (!data || !data.features || data.features.length === 0) {
+            console.error(`No features found in ${kecamatan} file`);
+            continue;
+          }
+          
+          // Add kecamatan name and district_code to each feature for consistency
+          const enhancedFeatures = data.features.map((feature: any) => {
+            if (!feature.properties) {
+              feature.properties = {};
+            }
+            
+            // Extract kecamatan name from filename and format it nicely
+            const kecamatanName = kecamatan.split('_').slice(1).join(' ')
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+            
+            // Set all possible property names for maximum compatibility
+            feature.properties.kecamatan = kecamatanName;
+            feature.properties.kec_name = kecamatanName;
+            feature.properties.KECAMATAN = kecamatanName;
+            feature.properties.NAMA = kecamatanName;
+            feature.properties.nama = kecamatanName;
+            feature.properties.name = kecamatanName;
+            feature.properties.NAME = kecamatanName;
+            
+            // Add district code for filtering
+            feature.properties.district_code = "5105";
+            feature.properties.kab_id = "5105";
+            feature.properties.kabupaten_id = "5105";
+            feature.properties.KABUPATEN_ID = "5105";
+            feature.properties.ID_KABUPATEN = "5105";
+            
+            return feature;
+          });
+          
+          // Add the features to our combined collection
+          combinedFeatures.push(...enhancedFeatures);
+          loadedCount++;
+        } catch (error) {
+          console.error(`Error processing ${kecamatan}:`, error);
+        }
+      }
+      
+      // If we loaded at least one kecamatan file, use the combined data
+      if (combinedFeatures.length > 0) {
+        const combinedData: GeoJSONData = {
+          type: "FeatureCollection",
+          features: combinedFeatures
+        };
+        setSubdistrictData(combinedData);
+        console.log(`Successfully loaded ${combinedFeatures.length} kecamatan features for Klungkung from ${loadedCount} files`);
+        return Promise.resolve();
+      }
+      
+      // If no kecamatan files were loaded, fall back to the district file
+      console.log('No kecamatan files loaded for Klungkung, falling back to district file');
+      
+      // Coba beberapa path yang mungkin untuk file district
+      let url = '/data/bali/klungkung/id5105_klungkung.geojson';
+      console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
+      let response = await fetch(url);
+      console.log(`First district attempt status: ${response.status} ${response.statusText}`);
+      
+      // Jika tidak berhasil, coba path alternatif
+      if (!response.ok) {
+        url = '/indonesia-district-master 3/id51_bali/id5105_klungkung/id5105_klungkung.geojson';
+        console.log(`[${new Date().toISOString()}] Second attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Second district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      // Jika masih tidak berhasil, coba path alternatif lain
+      if (!response.ok) {
+        url = '/id51_bali/id5105_klungkung/id5105_klungkung.geojson';
+        console.log(`[${new Date().toISOString()}] Third attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Third district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
+      if (!response.ok) {
+        url = '/geojsonKecamatan/id51_bali/id5105_klungkung/id5105_klungkung.geojson';
+        console.log(`[${new Date().toISOString()}] Fourth attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Fourth district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      if (!response.ok) throw new Error('Klungkung district file not found');
+      const text = await response.text();
+      
+      if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+        throw new Error('Received HTML instead of JSON');
+      }
+      
+      const data = JSON.parse(text);
+      setSubdistrictData(data);
+      console.log('Successfully loaded Klungkung district data');
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error loading Klungkung subdistrict data:", error);
+      // Set empty GeoJSON to avoid crashes
+      setSubdistrictData({
+        type: "FeatureCollection",
+        features: []
+      });
+      return Promise.reject(error);
+    }
+  };
+  
+  // Fungsi khusus untuk memuat data kecamatan Bangli
+  const loadBangliSubdistrictData = async (districtId: string | number) => {
+    console.log(`Loading Bangli subdistrict data with ID: ${districtId}`);
+    try {
+      // Define the kecamatan files for Bangli
+      const kecamatanFiles = [
+        "id5106010_susut",
+        "id5106020_bangli",
+        "id5106030_tembuku",
+        "id5106040_kintamani"
+      ];
+      
+      // Create a combined GeoJSON with all kecamatan
+      const combinedFeatures: any[] = [];
+      let loadedCount = 0;
+      
+      // Try to load each kecamatan file
+      for (const kecamatan of kecamatanFiles) {
+        try {
+          console.log(`Loading kecamatan: ${kecamatan}`);
+          // Coba beberapa path yang mungkin untuk file kecamatan
+          let url = `/data/bali/bangli/${kecamatan}.geojson`;
+          console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
+          let response = await fetch(url);
+          console.log(`First attempt status: ${response.status} ${response.statusText}`);
+          
+          // Jika tidak berhasil, coba path alternatif
+          if (!response.ok) {
+            url = `/indonesia-district-master 3/id51_bali/id5106_bangli/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Second attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Second attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          // Jika masih tidak berhasil, coba path alternatif lain
+          if (!response.ok) {
+            url = `/id51_bali/id5106_bangli/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Third attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Third attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
+          if (!response.ok) {
+            url = `/geojsonKecamatan/id51_bali/id5106_bangli/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Fourth attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Fourth attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          if (!response.ok) {
+            console.error(`[${new Date().toISOString()}] All attempts failed for ${kecamatan}. HTTP error ${response.status}: ${response.statusText}`);
+            console.error(`URL attempted: ${url}`);
+            continue;
+          } else {
+            console.log(`[${new Date().toISOString()}] Successfully loaded ${kecamatan} from ${url}`);
+          }
+          
+          let data;
+          try {
+            const text = await response.text();
+            if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+              console.error(`Received HTML instead of JSON for ${kecamatan}`);
+              continue;
+            }
+            data = JSON.parse(text);
+          } catch (parseError) {
+            console.error(`JSON parse error for ${kecamatan}:`, parseError);
+            continue;
+          }
+          
+          if (!data || !data.features || data.features.length === 0) {
+            console.error(`No features found in ${kecamatan} file`);
+            continue;
+          }
+          
+          // Add kecamatan name and district_code to each feature for consistency
+          const enhancedFeatures = data.features.map((feature: any) => {
+            if (!feature.properties) {
+              feature.properties = {};
+            }
+            
+            // Extract kecamatan name from filename and format it nicely
+            const kecamatanName = kecamatan.split('_').slice(1).join(' ')
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+            
+            // Set all possible property names for maximum compatibility
+            feature.properties.kecamatan = kecamatanName;
+            feature.properties.kec_name = kecamatanName;
+            feature.properties.KECAMATAN = kecamatanName;
+            feature.properties.NAMA = kecamatanName;
+            feature.properties.nama = kecamatanName;
+            feature.properties.name = kecamatanName;
+            feature.properties.NAME = kecamatanName;
+            
+            // Add district code for filtering
+            feature.properties.district_code = "5106";
+            feature.properties.kab_id = "5106";
+            feature.properties.kabupaten_id = "5106";
+            feature.properties.KABUPATEN_ID = "5106";
+            feature.properties.ID_KABUPATEN = "5106";
+            
+            return feature;
+          });
+          
+          // Add the features to our combined collection
+          combinedFeatures.push(...enhancedFeatures);
+          loadedCount++;
+        } catch (error) {
+          console.error(`Error processing ${kecamatan}:`, error);
+        }
+      }
+      
+      // If we loaded at least one kecamatan file, use the combined data
+      if (combinedFeatures.length > 0) {
+        const combinedData: GeoJSONData = {
+          type: "FeatureCollection",
+          features: combinedFeatures
+        };
+        setSubdistrictData(combinedData);
+        console.log(`Successfully loaded ${combinedFeatures.length} kecamatan features for Bangli from ${loadedCount} files`);
+        return Promise.resolve();
+      }
+      
+      // If no kecamatan files were loaded, fall back to the district file
+      console.log('No kecamatan files loaded for Bangli, falling back to district file');
+      
+      // Coba beberapa path yang mungkin untuk file district
+      let url = '/data/bali/bangli/id5106_bangli.geojson';
+      console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
+      let response = await fetch(url);
+      console.log(`First district attempt status: ${response.status} ${response.statusText}`);
+      
+      // Jika tidak berhasil, coba path alternatif
+      if (!response.ok) {
+        url = '/indonesia-district-master 3/id51_bali/id5106_bangli/id5106_bangli.geojson';
+        console.log(`[${new Date().toISOString()}] Second attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Second district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      // Jika masih tidak berhasil, coba path alternatif lain
+      if (!response.ok) {
+        url = '/id51_bali/id5106_bangli/id5106_bangli.geojson';
+        console.log(`[${new Date().toISOString()}] Third attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Third district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
+      if (!response.ok) {
+        url = '/geojsonKecamatan/id51_bali/id5106_bangli/id5106_bangli.geojson';
+        console.log(`[${new Date().toISOString()}] Fourth attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Fourth district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      if (!response.ok) throw new Error('Bangli district file not found');
+      const text = await response.text();
+      
+      if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+        throw new Error('Received HTML instead of JSON');
+      }
+      
+      const data = JSON.parse(text);
+      setSubdistrictData(data);
+      console.log('Successfully loaded Bangli district data');
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error loading Bangli subdistrict data:", error);
+      // Set empty GeoJSON to avoid crashes
+      setSubdistrictData({
+        type: "FeatureCollection",
+        features: []
+      });
+      return Promise.reject(error);
+    }
+  };
+  
   // Fungsi khusus untuk memuat data kecamatan Badung
   const loadBadungSubdistrictData = async (districtId: string | number) => {
     console.log(`Loading Badung subdistrict data with ID: ${districtId}`);
@@ -491,6 +1221,30 @@ const MapController: React.FC<{
     if (districtId.toString() === "46b426f4-ef81-486e-bfc6-d5e2fc09bc41") {
       console.log("Detected new Badung UUID, redirecting to Badung handler");
       return loadBadungSubdistrictData(districtId);
+    }
+    
+    // Check if this is the Bangli UUID
+    if (districtId.toString() === "218556bd-88ea-4c69-81f6-8bfd4249faf2") {
+      console.log("Detected Bangli UUID, redirecting to Bangli handler");
+      return loadBangliSubdistrictData(districtId);
+    }
+    
+    // Check if this is the Klungkung UUID
+    if (districtId.toString() === "4cd14b20-1d06-4de3-8d86-2046967aee26") {
+      console.log("Detected Klungkung UUID, redirecting to Klungkung handler");
+      return loadKlungkungSubdistrictData(districtId);
+    }
+    
+    // Check if this is the Buleleng UUID
+    if (districtId.toString() === "1738b7a8-fc72-4c53-a745-be655256cb3d") {
+      console.log("Detected Buleleng UUID, redirecting to Buleleng handler");
+      return loadBulelengSubdistrictData(districtId);
+    }
+    
+    // Check if this is the Jembrana UUID
+    if (districtId.toString() === "0ef10160-a253-471d-92b6-8d256e6f034f") {
+      console.log("Detected Jembrana UUID, redirecting to Jembrana handler");
+      return loadJembranaSubdistrictData(districtId);
     }
     
     try {
