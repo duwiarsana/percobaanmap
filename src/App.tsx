@@ -297,6 +297,193 @@ const MapController: React.FC<{
     return () => clearTimeout(loadingTimeout);
   }, [selectedDistrictId, isZooming]);
 
+  // Fungsi khusus untuk memuat data kecamatan Tabanan
+  const loadTabananSubdistrictData = async (districtId: string | number) => {
+    console.log(`Loading Tabanan subdistrict data with ID: ${districtId}`);
+    try {
+      // Define the kecamatan files for Tabanan
+      const kecamatanFiles = [
+        "id5102010_selemadeg",
+        "id5102011_selemadeg_timur",
+        "id5102012_selemadeg_barat",
+        "id5102020_kerambitan",
+        "id5102030_tabanan",
+        "id5102040_kediri",
+        "id5102050_marga",
+        "id5102060_baturiti",
+        "id5102070_penebel",
+        "id5102080_pupuan"
+      ];
+      
+      // Create a combined GeoJSON with all kecamatan
+      const combinedFeatures: any[] = [];
+      let loadedCount = 0;
+      
+      // Try to load each kecamatan file
+      for (const kecamatan of kecamatanFiles) {
+        try {
+          console.log(`Loading kecamatan: ${kecamatan}`);
+          // Coba beberapa path yang mungkin untuk file kecamatan
+          let url = `/data/bali/tabanan/${kecamatan}.geojson`;
+          console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
+          let response = await fetch(url);
+          console.log(`First attempt status: ${response.status} ${response.statusText}`);
+          
+          // Jika tidak berhasil, coba path alternatif
+          if (!response.ok) {
+            url = `/indonesia-district-master 3/id51_bali/id5102_tabanan/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Second attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Second attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          // Jika masih tidak berhasil, coba path alternatif lain
+          if (!response.ok) {
+            url = `/id51_bali/id5102_tabanan/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Third attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Third attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
+          if (!response.ok) {
+            url = `/geojsonKecamatan/id51_bali/id5102_tabanan/${kecamatan}.geojson`;
+            console.log(`[${new Date().toISOString()}] Fourth attempt to fetch: ${url}`);
+            response = await fetch(url);
+            console.log(`Fourth attempt status: ${response.status} ${response.statusText}`);
+          }
+          
+          if (!response.ok) {
+            console.error(`[${new Date().toISOString()}] All attempts failed for ${kecamatan}. HTTP error ${response.status}: ${response.statusText}`);
+            console.error(`URL attempted: ${url}`);
+            continue;
+          } else {
+            console.log(`[${new Date().toISOString()}] Successfully loaded ${kecamatan} from ${url}`);
+          }
+          
+          let data;
+          try {
+            const text = await response.text();
+            if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+              console.error(`Received HTML instead of JSON for ${kecamatan}`);
+              continue;
+            }
+            data = JSON.parse(text);
+          } catch (parseError) {
+            console.error(`JSON parse error for ${kecamatan}:`, parseError);
+            continue;
+          }
+          
+          if (!data || !data.features || data.features.length === 0) {
+            console.error(`No features found in ${kecamatan} file`);
+            continue;
+          }
+          
+          // Add kecamatan name and district_code to each feature for consistency
+          const enhancedFeatures = data.features.map((feature: any) => {
+            if (!feature.properties) {
+              feature.properties = {};
+            }
+            
+            // Extract kecamatan name from filename and format it nicely
+            const kecamatanName = kecamatan.split('_').slice(1).join(' ')
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+            
+            // Set all possible property names for maximum compatibility
+            feature.properties.kecamatan = kecamatanName;
+            feature.properties.kec_name = kecamatanName;
+            feature.properties.KECAMATAN = kecamatanName;
+            feature.properties.NAMA = kecamatanName;
+            feature.properties.nama = kecamatanName;
+            feature.properties.name = kecamatanName;
+            feature.properties.NAME = kecamatanName;
+            
+            // Add district code for filtering
+            feature.properties.district_code = "5102";
+            feature.properties.kab_id = "5102";
+            feature.properties.kabupaten_id = "5102";
+            feature.properties.KABUPATEN_ID = "5102";
+            feature.properties.ID_KABUPATEN = "5102";
+            
+            return feature;
+          });
+          
+          // Add the features to our combined collection
+          combinedFeatures.push(...enhancedFeatures);
+          loadedCount++;
+        } catch (error) {
+          console.error(`Error processing ${kecamatan}:`, error);
+        }
+      }
+      
+      // If we loaded at least one kecamatan file, use the combined data
+      if (combinedFeatures.length > 0) {
+        const combinedData: GeoJSONData = {
+          type: "FeatureCollection",
+          features: combinedFeatures
+        };
+        setSubdistrictData(combinedData);
+        console.log(`Successfully loaded ${combinedFeatures.length} kecamatan features for Tabanan from ${loadedCount} files`);
+        return Promise.resolve();
+      }
+      
+      // If no kecamatan files were loaded, fall back to the district file
+      console.log('No kecamatan files loaded for Tabanan, falling back to district file');
+      
+      // Coba beberapa path yang mungkin untuk file district
+      let url = '/data/bali/tabanan/id5102_tabanan.geojson';
+      console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
+      let response = await fetch(url);
+      console.log(`First district attempt status: ${response.status} ${response.statusText}`);
+      
+      // Jika tidak berhasil, coba path alternatif
+      if (!response.ok) {
+        url = '/indonesia-district-master 3/id51_bali/id5102_tabanan/id5102_tabanan.geojson';
+        console.log(`[${new Date().toISOString()}] Second attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Second district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      // Jika masih tidak berhasil, coba path alternatif lain
+      if (!response.ok) {
+        url = '/id51_bali/id5102_tabanan/id5102_tabanan.geojson';
+        console.log(`[${new Date().toISOString()}] Third attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Third district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
+      if (!response.ok) {
+        url = '/geojsonKecamatan/id51_bali/id5102_tabanan/id5102_tabanan.geojson';
+        console.log(`[${new Date().toISOString()}] Fourth attempt to fetch district file: ${url}`);
+        response = await fetch(url);
+        console.log(`Fourth district attempt status: ${response.status} ${response.statusText}`);
+      }
+      
+      if (!response.ok) throw new Error('Tabanan district file not found');
+      const text = await response.text();
+      
+      if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+        throw new Error('Received HTML instead of JSON');
+      }
+      
+      const data = JSON.parse(text);
+      setSubdistrictData(data);
+      console.log('Successfully loaded Tabanan district data');
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error loading Tabanan subdistrict data:", error);
+      // Set empty GeoJSON to avoid crashes
+      setSubdistrictData({
+        type: "FeatureCollection",
+        features: []
+      });
+      return Promise.reject(error);
+    }
+  };
+  
   // Fungsi khusus untuk memuat data kecamatan Jembrana
   const loadJembranaSubdistrictData = async (districtId: string | number) => {
     console.log(`Loading Jembrana subdistrict data with ID: ${districtId}`);
@@ -1245,6 +1432,12 @@ const MapController: React.FC<{
     if (districtId.toString() === "0ef10160-a253-471d-92b6-8d256e6f034f") {
       console.log("Detected Jembrana UUID, redirecting to Jembrana handler");
       return loadJembranaSubdistrictData(districtId);
+    }
+    
+    // Check if this is the Tabanan UUID
+    if (districtId.toString() === "f844eec7-5138-497c-a182-fff159c658d9") {
+      console.log("Detected Tabanan UUID, redirecting to Tabanan handler");
+      return loadTabananSubdistrictData(districtId);
     }
     
     try {
