@@ -28,9 +28,16 @@ export const loadBulelengSubdistrictData = async (
     for (const kecamatan of kecamatanFiles) {
       try {
         console.log(`Loading kecamatan: ${kecamatan}`);
-        const url = `/data/bali/buleleng/${kecamatan}.geojson`;
-        console.log(`Attempting to fetch: ${url}`);
-        const response = await fetch(url);
+        // Try multiple paths for the GeoJSON files
+        let url = `/geojsonKecamatan/id51_bali/id5108_buleleng/${kecamatan}.geojson`;
+        console.log(`First attempt to fetch: ${url}`);
+        let response = await fetch(url);
+        
+        if (!response.ok) {
+          url = `/data/bali/buleleng/${kecamatan}.geojson`;
+          console.log(`Second attempt to fetch: ${url}`);
+          response = await fetch(url);
+        }
         
         if (!response.ok) {
           console.error(`HTTP error ${response.status} for ${kecamatan}: ${response.statusText}`);

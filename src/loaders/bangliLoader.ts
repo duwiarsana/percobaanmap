@@ -8,8 +8,17 @@ export const loadBangliSubdistrictData = async (
   try {
     console.log('Loading Bangli kecamatan data');
     
-    // Load the BALI.geojson file which contains all districts
-    const response = await fetch('/data/BALI.geojson');
+    // Try to load from geojsonKecamatan directory first
+    let url = '/geojsonKecamatan/id51_bali/id5106_bangli/id5106_bangli.geojson';
+    console.log(`Attempting to fetch Bangli data from: ${url}`);
+    let response = await fetch(url);
+    
+    // If that fails, try the data directory
+    if (!response.ok) {
+      url = '/data/BALI.geojson';
+      console.log(`Falling back to: ${url}`);
+      response = await fetch(url);
+    }
     
     if (!response.ok) throw new Error('BALI.geojson not found');
     const responseText = await response.text();

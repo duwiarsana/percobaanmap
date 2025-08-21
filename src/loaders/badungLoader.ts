@@ -25,7 +25,7 @@ export const loadBadungSubdistrictData = async (
       try {
         console.log(`Loading kecamatan: ${kecamatan}`);
         // Coba beberapa path yang mungkin untuk file kecamatan
-        let url = `/data/bali/badung/${kecamatan}.geojson`;
+        let url = `/geojsonKecamatan/id51_bali/id5103_badung/${kecamatan}.geojson`;
         console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
         let response = await fetch(url);
         console.log(`First attempt status: ${response.status} ${response.statusText}`);
@@ -40,7 +40,7 @@ export const loadBadungSubdistrictData = async (
         
         // Jika masih tidak berhasil, coba path alternatif lain
         if (!response.ok) {
-          url = `/id51_bali/id5103_badung/${kecamatan}.geojson`;
+          url = `/data/bali/badung/${kecamatan}.geojson`;
           console.log(`[${new Date().toISOString()}] Third attempt to fetch: ${url}`);
           response = await fetch(url);
           console.log(`Third attempt status: ${response.status} ${response.statusText}`);
@@ -132,7 +132,7 @@ export const loadBadungSubdistrictData = async (
     console.log('No kecamatan files loaded for Badung, falling back to district file');
     
     // Coba beberapa path yang mungkin untuk file district
-    let url = '/data/bali/badung/id5103_badung.geojson';
+    let url = `/geojsonKecamatan/id51_bali/id5103_badung/id5103_badung.geojson`;
     console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
     let response = await fetch(url);
     console.log(`First district attempt status: ${response.status} ${response.statusText}`);
@@ -147,13 +147,12 @@ export const loadBadungSubdistrictData = async (
     
     // Jika masih tidak berhasil, coba path alternatif lain
     if (!response.ok) {
-      url = '/id51_bali/id5103_badung/id5103_badung.geojson';
+      url = `/data/bali/badung/id5103_badung.geojson`;
       console.log(`[${new Date().toISOString()}] Third attempt to fetch district file: ${url}`);
       response = await fetch(url);
       console.log(`Third district attempt status: ${response.status} ${response.statusText}`);
     }
     
-    // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
     if (!response.ok) {
       url = '/geojsonKecamatan/id51_bali/id5103_badung/id5103_badung.geojson';
       console.log(`[${new Date().toISOString()}] Fourth attempt to fetch district file: ${url}`);
