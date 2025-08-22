@@ -1,46 +1,112 @@
-# Getting Started with Create React App
+# GeoJSON Large File Processor
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A system for efficiently reading, processing, and visualizing large GeoJSON files.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- Efficiently processes large GeoJSON files using streaming techniques
+- Automatically fixes common GeoJSON formatting issues
+- Simplifies geometries to reduce file size while preserving shape
+- Provides a web interface to visualize and explore the data
+- Shows tooltips with feature names and properties
+- Interactive map with zoom and pan functionality
 
-### `npm start`
+## Installation
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. Install the required dependencies:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```bash
+pip install -r requirements.txt
+```
 
-### `npm test`
+## Usage
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Basic Usage
 
-### `npm run build`
+```bash
+python3 geojson_processor.py "prov 37.geojson"
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+This will:
+1. Load and analyze the GeoJSON file
+2. Start a web server on port 5000
+3. Open a web interface where you can view the map
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Advanced Options
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+python3 geojson_processor.py "prov 37.geojson" --simplify 0.005 --port 8080 --fix
+```
 
-### `npm run eject`
+Parameters:
+- `--simplify`: Simplification tolerance (higher = more simplification, default: 0.01)
+- `--port`: Port for the web server (default: 5000)
+- `--fix`: Attempt to fix common GeoJSON issues (like removing 'f' prefix)
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## How It Works
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. **Streaming Processing**: Uses `ijson` to process the GeoJSON file without loading it entirely into memory
+2. **Geometry Simplification**: Uses `geopandas` and `shapely` to simplify geometries while preserving shape
+3. **Web Visualization**: Uses Flask to serve a web interface with Leaflet.js for map visualization
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## Troubleshooting
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+If you encounter issues with the GeoJSON file format (like it starting with 'f{' instead of '{'), use the `--fix` option to attempt automatic repairs.
 
-## Learn More
+## System Requirements
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Python 3.6+
+- Sufficient memory to process the simplified geometries (though much less than loading the entire file)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
+
+## Frontend (React) Map Viewer
+
+An interactive web app is included to visualize administrative boundaries from GeoJSON files.
+
+### Stack
+
+- React 19
+- React-Leaflet 5 + Leaflet 1.9
+- CRA with react-app-rewired (see `config-overrides.js`) to allow importing `.geojson` if needed
+
+### Run (local)
+
+```bash
+npm install
+npm start
+```
+
+This serves the app at http://localhost:3000. Data is loaded from `public/data/` by default.
+
+### Data Layout
+
+- Canonical path: `public/data/<province>/<district>/<kecamatan>.geojson`
+- Province/district summaries may also exist at `public/data/prov_37.geojson`, `public/data/kab_37.geojson` (or legacy spaced names).
+
+### Current Implementation Notes
+
+- Main map composition and interactions: `src/App.tsx`.
+- Loaders and helpers for resilient data handling live inline today; these will migrate to `src/loaders/` over time.
+- Some regions still rely on multiple fallback URL patterns for robustness during data reorganization.
+
+### Behavior-Preserving Refactor (2025-08-22)
+
+To reduce duplication and improve maintainability without changing runtime behavior, we introduced small shared helpers in `src/App.tsx` and refactored regional subdistrict loaders to use them:
+
+- `parseJsonSafely(response, context)`
+  - Reads the response as text, guards against HTML responses, logs the same errors, and parses JSON.
+- `deriveKecamatanNameFromFileId(fileId)`
+  - Derives a display name (Title Case) from a kecamatan file id (e.g., `id5102010_selemadeg_timur`).
+- `enhanceKecamatanFeatures(features, kecamatanId, districtCode)`
+  - Canonicalizes feature properties consistently (sets name variants and district code variants) matching the existing behavior.
+
+Refactored functions now using the helpers (logic, logging order, and fallbacks unchanged):
+
+- `loadTabananSubdistrictData()` → uses helpers with district code `5102`.
+- `loadJembranaSubdistrictData()` → `5101`.
+- `loadBanyuwangiSubdistrictData()` → `3510`.
+- `loadBulelengSubdistrictData()` → `5108`.
+
+Planned follow-up (no behavior change): introduce a tiny `fetchWithFallback(urls: string[])` to centralize multi-URL attempts while preserving log order and messages.
+

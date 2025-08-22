@@ -29,6 +29,58 @@ interface GeoJSONData {
   features: GeoJSONFeature[];
 }
 
+// ----- Shared helpers (behavior-preserving) -----
+// Safely parse a Response as JSON with HTML guard, preserving existing error semantics
+async function parseJsonSafely(response: Response, context: string): Promise<any> {
+  const text = await response.text();
+  const trimmed = text.trim();
+  if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html')) {
+    console.error(`Received HTML instead of JSON for ${context}`);
+    throw new Error('Received HTML instead of JSON');
+  }
+  try {
+    return JSON.parse(text);
+  } catch (parseError) {
+    console.error(`JSON parse error for ${context}:`, parseError);
+    throw parseError;
+  }
+}
+
+function deriveKecamatanNameFromFileId(fileId: string): string {
+  return fileId
+    .split('_')
+    .slice(1)
+    .join(' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+function enhanceKecamatanFeatures(features: any[], kecamatanId: string, districtCode: string): any[] {
+  const kecamatanName = deriveKecamatanNameFromFileId(kecamatanId);
+  return features.map((feature: any) => {
+    if (!feature.properties) {
+      feature.properties = {};
+    }
+    // Name variants (keep exhaustive set as in original code)
+    feature.properties.kecamatan = kecamatanName;
+    feature.properties.kec_name = kecamatanName;
+    feature.properties.KECAMATAN = kecamatanName;
+    feature.properties.NAMA = kecamatanName;
+    feature.properties.nama = kecamatanName;
+    feature.properties.name = kecamatanName;
+    feature.properties.NAME = kecamatanName;
+
+    // District code/id variants (keep exhaustive set as in original code)
+    feature.properties.district_code = districtCode;
+    feature.properties.kab_id = districtCode;
+    feature.properties.kabupaten_id = districtCode;
+    feature.properties.KABUPATEN_ID = districtCode;
+    feature.properties.ID_KABUPATEN = districtCode;
+    return feature;
+  });
+}
+
 // MapController Props
 // This interface is used for the MapController component
 // Interface for MapController component props (currently unused but kept for future use)
@@ -363,14 +415,8 @@ const MapController: React.FC<{
           
           let data;
           try {
-            const text = await response.text();
-            if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
-              console.error(`Received HTML instead of JSON for ${kecamatan}`);
-              continue;
-            }
-            data = JSON.parse(text);
+            data = await parseJsonSafely(response, kecamatan);
           } catch (parseError) {
-            console.error(`JSON parse error for ${kecamatan}:`, parseError);
             continue;
           }
           
@@ -380,35 +426,7 @@ const MapController: React.FC<{
           }
           
           // Add kecamatan name and district_code to each feature for consistency
-          const enhancedFeatures = data.features.map((feature: any) => {
-            if (!feature.properties) {
-              feature.properties = {};
-            }
-            
-            // Extract kecamatan name from filename and format it nicely
-            const kecamatanName = kecamatan.split('_').slice(1).join(' ')
-              .split(' ')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-            
-            // Set all possible property names for maximum compatibility
-            feature.properties.kecamatan = kecamatanName;
-            feature.properties.kec_name = kecamatanName;
-            feature.properties.KECAMATAN = kecamatanName;
-            feature.properties.NAMA = kecamatanName;
-            feature.properties.nama = kecamatanName;
-            feature.properties.name = kecamatanName;
-            feature.properties.NAME = kecamatanName;
-            
-            // Add district code for filtering
-            feature.properties.district_code = "5102";
-            feature.properties.kab_id = "5102";
-            feature.properties.kabupaten_id = "5102";
-            feature.properties.KABUPATEN_ID = "5102";
-            feature.properties.ID_KABUPATEN = "5102";
-            
-            return feature;
-          });
+          const enhancedFeatures = enhanceKecamatanFeatures(data.features, kecamatan, "5102");
           
           // Add the features to our combined collection
           combinedFeatures.push(...enhancedFeatures);
@@ -562,35 +580,7 @@ const MapController: React.FC<{
           }
           
           // Add kecamatan name and district_code to each feature for consistency
-          const enhancedFeatures = data.features.map((feature: any) => {
-            if (!feature.properties) {
-              feature.properties = {};
-            }
-            
-            // Extract kecamatan name from filename and format it nicely
-            const kecamatanName = kecamatan.split('_').slice(1).join(' ')
-              .split(' ')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-            
-            // Set all possible property names for maximum compatibility
-            feature.properties.kecamatan = kecamatanName;
-            feature.properties.kec_name = kecamatanName;
-            feature.properties.KECAMATAN = kecamatanName;
-            feature.properties.NAMA = kecamatanName;
-            feature.properties.nama = kecamatanName;
-            feature.properties.name = kecamatanName;
-            feature.properties.NAME = kecamatanName;
-            
-            // Add district code for filtering
-            feature.properties.district_code = "5101";
-            feature.properties.kab_id = "5101";
-            feature.properties.kabupaten_id = "5101";
-            feature.properties.KABUPATEN_ID = "5101";
-            feature.properties.ID_KABUPATEN = "5101";
-            
-            return feature;
-          });
+          const enhancedFeatures = enhanceKecamatanFeatures(data.features, kecamatan, "5101");
           
           // Add the features to our combined collection
           combinedFeatures.push(...enhancedFeatures);
@@ -756,35 +746,7 @@ const MapController: React.FC<{
           }
           
           // Add kecamatan name and district_code to each feature for consistency
-          const enhancedFeatures = data.features.map((feature: any) => {
-            if (!feature.properties) {
-              feature.properties = {};
-            }
-            
-            // Extract kecamatan name from filename and format it nicely
-            const kecamatanName = kecamatan.split('_').slice(1).join(' ')
-              .split(' ')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-            
-            // Set all possible property names for maximum compatibility
-            feature.properties.kecamatan = kecamatanName;
-            feature.properties.kec_name = kecamatanName;
-            feature.properties.KECAMATAN = kecamatanName;
-            feature.properties.NAMA = kecamatanName;
-            feature.properties.nama = kecamatanName;
-            feature.properties.name = kecamatanName;
-            feature.properties.NAME = kecamatanName;
-            
-            // Add district code for filtering
-            feature.properties.district_code = "3510";
-            feature.properties.kab_id = "3510";
-            feature.properties.kabupaten_id = "3510";
-            feature.properties.KABUPATEN_ID = "3510";
-            feature.properties.ID_KABUPATEN = "3510";
-            
-            return feature;
-          });
+          const enhancedFeatures = enhanceKecamatanFeatures(data.features, kecamatan, "3510");
           
           // Add the features to our combined collection
           combinedFeatures.push(...enhancedFeatures);
@@ -934,35 +896,7 @@ const MapController: React.FC<{
           }
           
           // Add kecamatan name and district_code to each feature for consistency
-          const enhancedFeatures = data.features.map((feature: any) => {
-            if (!feature.properties) {
-              feature.properties = {};
-            }
-            
-            // Extract kecamatan name from filename and format it nicely
-            const kecamatanName = kecamatan.split('_').slice(1).join(' ')
-              .split(' ')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-            
-            // Set all possible property names for maximum compatibility
-            feature.properties.kecamatan = kecamatanName;
-            feature.properties.kec_name = kecamatanName;
-            feature.properties.KECAMATAN = kecamatanName;
-            feature.properties.NAMA = kecamatanName;
-            feature.properties.nama = kecamatanName;
-            feature.properties.name = kecamatanName;
-            feature.properties.NAME = kecamatanName;
-            
-            // Add district code for filtering
-            feature.properties.district_code = "5108";
-            feature.properties.kab_id = "5108";
-            feature.properties.kabupaten_id = "5108";
-            feature.properties.KABUPATEN_ID = "5108";
-            feature.properties.ID_KABUPATEN = "5108";
-            
-            return feature;
-          });
+          const enhancedFeatures = enhanceKecamatanFeatures(data.features, kecamatan, "5108");
           
           // Add the features to our combined collection
           combinedFeatures.push(...enhancedFeatures);
