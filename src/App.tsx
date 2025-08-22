@@ -9,6 +9,7 @@ import { createDistrictStyle, subdistrictStyle } from './map/styles';
 import { getDistrictId, getDistrictName } from './utils/geojsonProps';
 import { createOnEachDistrict, createOnEachSubdistrict } from './map/handlers';
 import { setAppBridge, getAppBridge } from './appBridge';
+import { GeoJSONData, GeoJSONFeature } from './types/geojson';
 
 // Extend Window interface to include our app instance
 declare global {
@@ -17,21 +18,7 @@ declare global {
   }
 }
 
-// Type definitions
-interface GeoJSONFeature {
-  type: "Feature";
-  properties: {
-    [key: string]: any;
-  };
-  geometry: any;
-}
-
-interface GeoJSONData {
-  type: "FeatureCollection";
-  features: GeoJSONFeature[];
-}
-
-
+// (Using GeoJSON types from existing modules; no local re-definitions here)
 
 const MapController: React.FC<{
   selectedProvince: string | null;
@@ -60,17 +47,7 @@ const MapController: React.FC<{
   const [subdistrictData, setSubdistrictData] = useState<GeoJSONData | null>(null);
   const [selectedProvinceId, setSelectedProvinceId] = useState<string | number | null>(null);
   
-  // Attach loadSubdistrictData into the appBridge for handlers to call
-  useEffect(() => {
-    const current = getAppBridge() || {};
-    setAppBridge({ ...current, loadSubdistrictData });
-    return () => {
-      const b = getAppBridge() || {};
-      // remove only loadSubdistrictData while keeping others
-      const { loadSubdistrictData: _omit, ...rest } = b as any;
-      setAppBridge(rest);
-    };
-  }, []);
+  // (Moved the appBridge effect to run after loadSubdistrictData is declared)
 
   // First, determine the province ID when a province is selected
   useEffect(() => {
@@ -124,7 +101,7 @@ const MapController: React.FC<{
       setDistrictData(null);
       setSubdistrictData(null);
     }
-  }, [selectedProvince]);
+  }, [selectedProvince, setSelectedDistrict, setSelectedDistrictId]);
   
   // Load district data when province ID is determined
   useEffect(() => {
@@ -201,10 +178,12 @@ const MapController: React.FC<{
       fetchDistrictData();
     } else {
       // If no province ID is determined, don't show any districts
+      setSelectedDistrict(null);
+      setSelectedDistrictId(null);
       setDistrictData(null);
       setSubdistrictData(null);
     }
-  }, [selectedProvinceId, isZooming]);
+  }, [selectedProvinceId, isZooming, setSelectedDistrict, setSelectedDistrictId]);
 
   // Use a ref to track if we've already filtered for this district ID
   const filteredForDistrictRef = useRef<string | number | null>(null);
@@ -248,6 +227,59 @@ const MapController: React.FC<{
   // Effect to load subdistrict data when a district is selected - using ref to prevent loops
   const prevDistrictIdRef = useRef<string | number | null>(null);
   const isLoadingRef = useRef(false);
+  
+  // Load subdistrict data for any selected district - Refactored to use data-driven approach
+  const loadSubdistrictData = useCallback(async (districtId: string | number) => {
+    if (!districtId) return Promise.resolve();
+  
+    // Prefer a stable 4-digit ID from config by selectedDistrict name
+    let preferredId: string | number | undefined;
+    try {
+      if (selectedDistrict) {
+        const cfgByName = findDistrictConfig(selectedDistrict);
+        if (cfgByName?.id) preferredId = cfgByName.id; // e.g., '5103'
+      }
+    } catch {}
+
+    // Fallback: normalize from the provided districtId
+    const fallbackNormalized: string | number = typeof districtId === 'number'
+      ? districtId
+      : (districtId.toString().match(/\d+/)?.join('') || districtId);
+
+    const normalizedId: string | number = preferredId ?? fallbackNormalized;
+    
+    try {
+      // Use the generic data loader with normalized ID
+      const result: LoadResult = await loadSubdistrictDataGeneric(normalizedId);
+
+      if (result.success && result.data) {
+        setSubdistrictData(result.data as GeoJSONData);
+
+        // Log success with meaningful information
+        const districtConfig = findDistrictConfig(normalizedId);
+        const districtName = districtConfig?.name || 'Unknown';
+
+        if (result.loadedCount && result.loadedCount > 0) {
+          console.log(`✅ Successfully loaded ${result.loadedCount}/${result.totalCount} subdistrict files for ${districtName} with ${result.data.features.length} total features`);
+        } else {
+          console.log(`✅ Successfully loaded fallback data for ${districtName} with ${result.data.features.length} features`);
+        }
+
+        return Promise.resolve();
+      } else {
+        // Handle failure with meaningful error message
+        console.error(`❌ Failed to load subdistrict data: ${result.error}`);
+
+        // Set empty data to prevent crashes
+        setSubdistrictData(createEmptyGeoJSON());
+
+        return Promise.reject(new Error(result.error));
+      }
+    } catch (error) {
+      setSubdistrictData(createEmptyGeoJSON());
+      return Promise.reject(error);
+    }
+  }, [selectedDistrict]);
   
   useEffect(() => {
     // Skip loading if we're in the middle of a zoom animation
@@ -298,61 +330,18 @@ const MapController: React.FC<{
     
     // Cleanup function to clear timeout if component unmounts or effect re-runs
     return () => clearTimeout(loadingTimeout);
-  }, [selectedDistrictId, isZooming]);
+  }, [selectedDistrictId, isZooming, loadSubdistrictData]);
 
-
-  // Load subdistrict data for any selected district - Refactored to use data-driven approach
-  const loadSubdistrictData = async (districtId: string | number) => {
-    if (!districtId) return Promise.resolve();
-  
-    // Prefer a stable 4-digit ID from config by selectedDistrict name
-    let preferredId: string | number | undefined;
-    try {
-      if (selectedDistrict) {
-        const cfgByName = findDistrictConfig(selectedDistrict);
-        if (cfgByName?.id) preferredId = cfgByName.id; // e.g., '5103'
-      }
-    } catch {}
-
-    // Fallback: normalize from the provided districtId
-    const fallbackNormalized: string | number = typeof districtId === 'number'
-      ? districtId
-      : (districtId.toString().match(/\d+/)?.join('') || districtId);
-
-    const normalizedId: string | number = preferredId ?? fallbackNormalized;
-    
-    try {
-      // Use the generic data loader with normalized ID
-      const result: LoadResult = await loadSubdistrictDataGeneric(normalizedId);
-
-      if (result.success && result.data) {
-        setSubdistrictData(result.data);
-
-        // Log success with meaningful information
-        const districtConfig = findDistrictConfig(normalizedId);
-        const districtName = districtConfig?.name || 'Unknown';
-
-        if (result.loadedCount && result.loadedCount > 0) {
-          console.log(`✅ Successfully loaded ${result.loadedCount}/${result.totalCount} subdistrict files for ${districtName} with ${result.data.features.length} total features`);
-        } else {
-          console.log(`✅ Successfully loaded fallback data for ${districtName} with ${result.data.features.length} features`);
-        }
-
-        return Promise.resolve();
-      } else {
-        // Handle failure with meaningful error message
-        console.error(`❌ Failed to load subdistrict data: ${result.error}`);
-
-        // Set empty data to prevent crashes
-        setSubdistrictData(createEmptyGeoJSON());
-
-        return Promise.reject(new Error(result.error));
-      }
-    } catch (error) {
-      setSubdistrictData(createEmptyGeoJSON());
-      return Promise.reject(error);
-    }
-  };
+  // Expose loadSubdistrictData via appBridge so handlers can call it
+  useEffect(() => {
+    const current = getAppBridge() || {};
+    setAppBridge({ ...current, loadSubdistrictData });
+    return () => {
+      const b = getAppBridge() || {} as any;
+      const { loadSubdistrictData: _omit, ...rest } = b;
+      setAppBridge(rest);
+    };
+  }, [loadSubdistrictData]);
 
   // Use extracted style/handler factories to keep logic identical and improve structure
   const styleDistrict = useMemo(() => createDistrictStyle(selectedDistrict), [selectedDistrict]);
@@ -534,7 +523,7 @@ const App: React.FC = () => {
     if (!geoJsonData || !selectedProvince) return null;
     return {
       type: "FeatureCollection",
-      features: geoJsonData.features.filter((feature: GeoJSONFeature) => {
+      features: geoJsonData.features.filter((feature: any) => {
         const name = feature.properties.prov_name || 
                     feature.properties.Propinsi || 
                     feature.properties.PROVINSI || 
