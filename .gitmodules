@@ -1,0 +1,3 @@
+[submodule "indonesia-map-viewer"]
+	path = indonesia-map-viewer
+	url = https://github.com/duwiarsana/percobaanmap.git
