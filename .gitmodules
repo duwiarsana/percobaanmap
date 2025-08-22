@@ -2,3 +2,6 @@
 	path = indonesia-map-viewer
 	url = https://github.com/duwiarsana/percobaanmap.git
 	ignore = untracked
+[submodule "public/data"]
+	path = public/data
+	url = git@github.com:duwiarsana/percobaanmap-data.git
