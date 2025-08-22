@@ -19,5 +19,7 @@ export interface ProvinceConfig {
   id: string;
   name: string;
   path: string;
+  // Path to the districts (kabupaten/kota) GeoJSON collection used for filtering
+  districtsFile?: string;
   districts: Record<string, DistrictConfig>;
 }

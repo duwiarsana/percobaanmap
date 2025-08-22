@@ -4,6 +4,7 @@ const PROV_51: ProvinceConfig = {
   id: '51',
   name: 'Bali',
   path: '/data/id51_bali',
+  districtsFile: '/data/kab_37.geojson',
   districts: {
     '5101': {
       id: '5101',

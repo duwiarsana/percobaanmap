@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import './App.css';
 import L, { Map } from 'leaflet';
 import { loadSubdistrictData as loadSubdistrictDataGeneric, createEmptyGeoJSON, LoadResult } from './data-loader';
-import { findDistrictConfig } from './data-config';
+import { findDistrictConfig, DATA_CONFIG } from './data-config';
 import { createDistrictStyle, subdistrictStyle } from './map/styles';
 import { getDistrictId, getDistrictName } from './utils/geojsonProps';
 import { createOnEachDistrict, createOnEachSubdistrict } from './map/handlers';
@@ -111,60 +111,50 @@ const MapController: React.FC<{
         
         if (!isZooming) {
           try {
-            // Choose dataset by province (Bali = 51). Use unified districts file to avoid including subdistrict geometries.
+            // Choose dataset by province using unified districts file. We'll filter features by province digits.
             const selProvDigits = selectedProvinceId?.toString().match(/\d+/)?.[0];
-            const districtUrl = '/data/kab_37.geojson';
+            const provCfg = selProvDigits ? DATA_CONFIG[selProvDigits] : undefined;
+            const districtUrl = provCfg?.districtsFile || '/data/kab_37.geojson';
 
             const response = await fetch(districtUrl);
             if (!response.ok) throw new Error(`Failed to fetch district data from ${districtUrl}`);
 
             const data = await response.json();
             
-            // Filter districts by province ID. For Bali (51), derive province via regency 4-digit code.
+            // Filter districts by province: try to derive province from 4-digit regency code (first two digits)
             let filteredData: GeoJSONData;
-            if (selProvDigits === '51') {
-              const features = (data.features as any[])
-                .filter((feature: any) => {
-                  const props = feature.properties || {};
-                  const code = getDistrictId(props); // e.g., '5103'
-                  const codeStr = typeof code === 'number' ? code.toString() : (code || '');
-                  if (codeStr.startsWith('51')) return true;
-                  // Fallback: match by district name via config
-                  const name = getDistrictName(props);
-                  const cfg = name ? findDistrictConfig(name) : undefined;
-                  return !!cfg?.id && cfg.id.toString().startsWith('51');
-                })
-                .map((feature: any) => {
-                  const props = feature.properties || {};
-                  const name = getDistrictName(props);
-                  const cfg = name ? findDistrictConfig(name) : undefined;
-                  const code = cfg?.id ?? getDistrictId(props);
-                  const regencyCode = typeof code === 'number' ? code.toString() : (code || undefined);
-                  return regencyCode ? {
-                    ...feature,
-                    properties: {
-                      ...props,
-                      regency_code: regencyCode,
-                      province_code: '51',
-                    }
-                  } : feature;
-                });
-              filteredData = { type: 'FeatureCollection', features } as GeoJSONData;
-            } else {
-              filteredData = {
-                type: 'FeatureCollection',
-                features: data.features.filter((feature: any) => {
-                  const provinceId = feature.properties.prov_id || 
-                                    feature.properties.provinsi_id || 
-                                    feature.properties.ID_PROV || 
-                                    feature.properties.PROVINSI ||
-                                    feature.properties.province_code; // e.g., 'idXX'
-                  const featProvDigits = provinceId?.toString().match(/\d+/)?.[0];
-                  const selProvDigitsInner = selectedProvinceId?.toString().match(/\d+/)?.[0];
-                  return featProvDigits && selProvDigitsInner && featProvDigits === selProvDigitsInner;
-                })
-              };
-            }
+            const features = (data.features as any[])
+              .filter((feature: any) => {
+                const props = feature.properties || {};
+                const code = getDistrictId(props); // e.g., '3510'
+                const codeStr = typeof code === 'number' ? code.toString() : (code || '');
+                const codeProv = codeStr.match(/^(\d{2})/ )?.[1];
+                if (codeProv && selProvDigits && codeProv === selProvDigits) return true;
+                // Fallbacks:
+                const name = getDistrictName(props);
+                const cfg = name ? findDistrictConfig(name) : undefined;
+                if (cfg?.id && selProvDigits && cfg.id.toString().startsWith(selProvDigits)) return true;
+                const provinceId = props.prov_id || props.provinsi_id || props.ID_PROV || props.PROVINSI || props.province_code;
+                const featProvDigits = provinceId?.toString().match(/\d+/)?.[0];
+                return featProvDigits && selProvDigits && featProvDigits === selProvDigits;
+              })
+              .map((feature: any) => {
+                const props = feature.properties || {};
+                const name = getDistrictName(props);
+                const cfg = name ? findDistrictConfig(name) : undefined;
+                const code = cfg?.id ?? getDistrictId(props);
+                const regencyCode = typeof code === 'number' ? code.toString() : (code || undefined);
+                const provinceCode = regencyCode?.slice(0, 2);
+                return regencyCode ? {
+                  ...feature,
+                  properties: {
+                    ...props,
+                    regency_code: regencyCode,
+                    ...(provinceCode ? { province_code: provinceCode } : {}),
+                  }
+                } : feature;
+              });
+            filteredData = { type: 'FeatureCollection', features } as GeoJSONData;
             
             setDistrictData(filteredData);
             console.log(`Successfully loaded ${filteredData.features.length} district features for province ID: ${selectedProvinceId}`);
