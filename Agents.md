@@ -8,8 +8,9 @@ Define roles and operating procedures for human + AI collaborators in this GeoJS
 - Tech Lead (TL): Architecture, data model, reviews.
 - Frontend Engineer (FE): Map UI, interactions, state.
 - Data Engineer (DE): GeoJSON curation, loaders in `src/loaders/`.
+- Data Steward (DS): Owns `public/data/` structure and conventions; ensures hierarchical naming and IDs remain consistent across drops.
 - QA: Test plan, data and interaction verification.
-- AI Assistant (Cascade): Draft code/docs, validate data, propose refactors, keep TODOs in sync.
+- AI Assistant (Cascade): Draft code/docs, validate data, propose refactors, keep TODOs in sync; enforce data‑driven principles.
 
 ## Operating Cadence
 - Daily: Short async status + blockers.
@@ -20,6 +21,7 @@ Define roles and operating procedures for human + AI collaborators in this GeoJS
 - Decisions → `rules.md` (Decision Log).
 - Specs → `PRD.md`.
 - Issues: tag `data`, `map-ui`, `perf`, `infra`.
+- Data changes must reference exact paths under `public/data/` and affected IDs (e.g., `5107`).
 
 ## AI Collaboration Prompts
 - “Create loader + type guards for new GeoJSON in `public/data/...`”
@@ -39,7 +41,27 @@ Define roles and operating procedures for human + AI collaborators in this GeoJS
 ## Tech Stack Awareness
 - React 19 + React-Leaflet 5 + Leaflet 1.9.
 - CRA with `react-app-rewired` and `config-overrides.js` to load `.geojson` via `json-loader`.
-- Data lives under `public/data/`; loaders in `src/loaders/`; shared types in `src/types/`.
+- Data lives under `public/data/` (single source of truth). Loaders in `src/loaders/`; shared types in `src/types/`. Config in `src/data-config.ts`.
+
+## Data‑Driven Operating Principles
+- Hierarchical exploration is mandatory: Province → District (Kabupaten/Kota) → Subdistrict (Kecamatan).
+- No region-specific if/else branches in UI logic. Extend by data only:
+  - Add/modify GeoJSON files under `public/data/`.
+  - Register districts/subdistricts in `src/data-config.ts`.
+  - Keep extraction/canonicalization rules in shared utilities (`src/utils/geojsonProps.ts`).
+- UI should resolve IDs/names via configuration and property normalization, not hardcoded strings.
+
+## Guardrails (what PRs must not do)
+- Do not hardcode province/district logic in `src/App.tsx` beyond generic mechanisms and fallbacks.
+- Do not introduce new data paths outside `public/data/`.
+- Do not bypass configuration lookups (`findDistrictConfig`) when deriving IDs.
+
+## Definition of Done (augmented)
+- Demoable locally.
+- Types sound; no console errors.
+- Docs updated; data validated.
+- Data-driven: new regions/levels load purely by adding data + config, no bespoke code.
+- README and `rules.md` updated if conventions changed.
 
 ## Responsibilities Mapped to Code
 - FE: maintain `src/App.tsx` interactions, performance (hover/click <16ms), and URL state (planned).

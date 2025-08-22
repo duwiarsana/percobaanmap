@@ -2,11 +2,12 @@
 
 ## Codebase Conventions
 - TypeScript (strict). Avoid `any`; prefer type guards.
-- Structure:
-  - GeoJSON in `public/data/`.
-  - Loaders in `src/loaders/` (fetch, parse, validate, normalize).
-  - Types in `src/types/` (e.g., `geojson.ts`, `district.ts`).
-  - UI in `src/` components; styles in `App.css` or CSS modules.
+- Structure (data-driven, hierarchical):
+  - GeoJSON: single source of truth under `public/data/`.
+  - Configuration: `src/data-config.ts` (provinces → districts → subdistricts; supports numeric IDs, UUIDs, names).
+  - Generic loaders: `src/data-loader.ts` and `src/loaders/` (fetch, parse, validate, normalize, enrich).
+  - Types: `src/types/` (e.g., `geojson.ts`, `district.ts`).
+  - UI: `src/` components; styles in `App.css` or CSS modules.
 - Imports: consistent absolute/aliased; avoid cycles.
 - State: memoize heavy transforms; keep renders light.
 
@@ -23,18 +24,22 @@
 - File size: target < 5MB per layer; otherwise simplify/tile.
 
 ## Directory & data path conventions
-- Keep data under `public/data/<province>/<district>/<kecamatan>.geojson` where possible.
-- Provinces/districts summary files live in `public/data/` (e.g., `prov_37.geojson`, `kab_37.geojson`).
-- Temporary fallbacks (seen in `src/App.tsx`) attempt multiple URL patterns; migrate toward a single canonical path per region.
+- All datasets must live in `public/data/`.
+- Prefer hierarchical structure: `public/data/<province>/<district>/<kecamatan>.geojson`.
+- Province and district summaries: `public/data/prov_37.geojson`, `public/data/kab_37.geojson`.
+- Temporary fallbacks in `src/App.tsx` are allowed but must converge to canonical paths; track cleanup in issues.
+- Bali convention: `/data/id51_bali/id{district_id}_{district_name}/...`.
 
 ## Property canonicalization
 - Canonical keys exposed to UI: `id`, `name`, `kec_name`, `kab_name`, `prov_name`, `district_code`.
 - Map common variants to canonical keys in loaders:
   - `ID|KODE|id|gid|uuid|code` → `id`
   - `NAMA|NAME|name|Nama|nama` → `name`
+  - `prov_name|PROVINSI|Propinsi|provinsi` → `prov_name`
   - `kabupaten|KABUPATEN|kab_name` → `kab_name`
   - `kecamatan|KECAMATAN|kec_name` → `kec_name`
   - `kab_id|kabupaten_id|ID_KABUPATEN|KABUPATEN_ID` → `district_code`
+- Name normalization in lookups must remove spaces/underscores/hyphens and diacritics (see `findDistrictConfig`).
 
 ## Loader contract
 - Implement types from `src/loaders/types.ts` and export from `src/loaders/index.ts`.
@@ -42,6 +47,7 @@
   - Fetch with resilience (multiple paths if needed) and parse JSON safely (guard against HTML responses).
   - Canonicalize properties per above; ensure `FeatureCollection` shape.
   - Optionally enrich features (e.g., add `district_code`) consistently across regions.
+  - Never hardcode province/district logic in loaders; rely on configuration and normalization helpers (`src/utils/geojsonProps.ts`).
 
 ## Performance Budgets
 - TTI < 3s (local dev).
@@ -55,6 +61,7 @@
 - Commits: Conventional Commits (e.g., `feat: add Badung choropleth`, `data: update kabupaten boundaries 2024`).
 - PRs: small, with before/after images or GIF.
 - Reviews: ≥1 reviewer; CI typecheck/lint pass.
+- Data changes must list impacted `public/data/...` paths and updated `src/data-config.ts` entries.
 
 ## Testing
 - Type checks: `tsc --noEmit` passes.
@@ -73,6 +80,7 @@
 ## Decision Log
 - Format: YYYY-MM-DD | decision | context | owner
 - Example: 2025-08-22 | Use EPSG:4326 only | Keep loaders simple | TL
+- 2025-08-22 | Enforce data-driven hierarchical mechanism | UI must not encode region-specific branches; `public/data/` is source of truth | TL
 
 ## QA checklist (summary)
 - Feature counts per region match source of truth.
