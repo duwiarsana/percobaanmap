@@ -1,0 +1,138 @@
+import { ProvinceConfig } from '../types/data-config';
+
+const PROV: ProvinceConfig = {
+  id: '75',
+  name: 'Gorontalo',
+  path: '/data/id75_gorontalo',
+  districtsFile: '/data/kab_75.geojson',
+  districts: {
+    '7501': {
+      id: '7501',
+      name: 'Boalemo',
+      path: '/data/id75_gorontalo/id7501_boalemo',
+      subdistricts: [
+        { id: 'id7501031_mananggu' },
+        { id: 'id7501040_tilamuta' },
+        { id: 'id7501041_dulupi' },
+        { id: 'id7501042_botumoito' },
+        { id: 'id7501050_paguyaman' },
+        { id: 'id7501051_wonosari' },
+        { id: 'id7501052_paguyaman_pantai' },
+      ],
+      fallbackFile: 'id7501_boalemo.geojson'
+    },
+    '7502': {
+      id: '7502',
+      name: 'Gorontalo',
+      path: '/data/id75_gorontalo/id7502_gorontalo',
+      subdistricts: [
+        { id: 'id7502010_batudaa_pantai' },
+        { id: 'id7502011_biluhu' },
+        { id: 'id7502020_batudaa' },
+        { id: 'id7502021_bongomeme' },
+        { id: 'id7502022_tabongo' },
+        { id: 'id7502023_dungaliyo' },
+        { id: 'id7502030_tibawa' },
+        { id: 'id7502031_pulubala' },
+        { id: 'id7502040_boliyohuto' },
+        { id: 'id7502041_mootilango' },
+        { id: 'id7502042_tolangohula' },
+        { id: 'id7502043_asparaga' },
+        { id: 'id7502044_bilato' },
+        { id: 'id7502070_limboto' },
+        { id: 'id7502071_limboto_barat' },
+        { id: 'id7502080_telaga' },
+        { id: 'id7502081_telaga_biru' },
+        { id: 'id7502082_tilango' },
+        { id: 'id7502083_telaga_jaya' },
+        { id: 'id7502888_danau_limboto' },
+      ],
+      fallbackFile: 'id7502_gorontalo.geojson'
+    },
+    '7503': {
+      id: '7503',
+      name: 'Pohuwato',
+      path: '/data/id75_gorontalo/id7503_pohuwato',
+      subdistricts: [
+        { id: 'id7503010_popayato' },
+        { id: 'id7503011_popayato_barat' },
+        { id: 'id7503012_popayato_timur' },
+        { id: 'id7503020_lemito' },
+        { id: 'id7503021_wanggarasi' },
+        { id: 'id7503030_marisa' },
+        { id: 'id7503031_patilanggio' },
+        { id: 'id7503032_buntulia' },
+        { id: 'id7503033_duhiadaa' },
+        { id: 'id7503040_randangan' },
+        { id: 'id7503041_taluditi' },
+        { id: 'id7503050_paguat' },
+        { id: 'id7503051_dengilo' },
+      ],
+      fallbackFile: 'id7503_pohuwato.geojson'
+    },
+    '7504': {
+      id: '7504',
+      name: 'Bone Bolango',
+      path: '/data/id75_gorontalo/id7504_bone_bolango',
+      subdistricts: [
+        { id: 'id7504010_tapa' },
+        { id: 'id7504011_bulango_utara' },
+        { id: 'id7504012_bulango_selatan' },
+        { id: 'id7504013_bulango_timur' },
+        { id: 'id7504014_bulango_ulu' },
+        { id: 'id7504020_kabila' },
+        { id: 'id7504021_botu_pingge' },
+        { id: 'id7504022_tilongkabila' },
+        { id: 'id7504030_suwawa' },
+        { id: 'id7504031_suwawa_selatan' },
+        { id: 'id7504032_suwawa_timur' },
+        { id: 'id7504033_suwawa_tengah' },
+        { id: 'id7504034_pinogu' },
+        { id: 'id7504040_bonepantai' },
+        { id: 'id7504041_kabila_bone' },
+        { id: 'id7504042_bone_raya' },
+        { id: 'id7504043_bone' },
+        { id: 'id7504044_bulawa' },
+      ],
+      fallbackFile: 'id7504_bone_bolango.geojson'
+    },
+    '7505': {
+      id: '7505',
+      name: 'Gorontalo Utara',
+      path: '/data/id75_gorontalo/id7505_gorontalo_utara',
+      subdistricts: [
+        { id: 'id7505010_atinggola' },
+        { id: 'id7505011_gentuma_raya' },
+        { id: 'id7505020_kwandang' },
+        { id: 'id7505021_tomilito' },
+        { id: 'id7505022_ponelo_kepulauan' },
+        { id: 'id7505030_anggrek' },
+        { id: 'id7505031_monano' },
+        { id: 'id7505040_sumalata' },
+        { id: 'id7505041_sumalata_timur' },
+        { id: 'id7505050_tolinggula' },
+        { id: 'id7505051_biau' },
+      ],
+      fallbackFile: 'id7505_gorontalo_utara.geojson'
+    },
+    '7571': {
+      id: '7571',
+      name: 'Kota Gorontalo',
+      path: '/data/id75_gorontalo/id7571_kota_gorontalo',
+      subdistricts: [
+        { id: 'id7571010_kota_barat' },
+        { id: 'id7571011_dungingi' },
+        { id: 'id7571020_kota_selatan' },
+        { id: 'id7571021_kota_timur' },
+        { id: 'id7571022_hulonthalangi' },
+        { id: 'id7571023_dumbo_raya' },
+        { id: 'id7571030_kota_utara' },
+        { id: 'id7571031_kota_tengah' },
+        { id: 'id7571032_sipatana' },
+      ],
+      fallbackFile: 'id7571_kota_gorontalo.geojson'
+    },
+  }
+};
+
+export default PROV;

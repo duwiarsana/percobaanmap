@@ -16,7 +16,7 @@ Examples:
 import argparse
 import re
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_DATA = ROOT / 'public' / 'data'
@@ -25,7 +25,7 @@ PROV_DIR_PATTERN = re.compile(r'^id(\d{2})_([a-z0-9_]+)$')
 DIST_DIR_PATTERN = re.compile(r'^id(\d{4})_([a-z0-9_]+)$')
 
 
-def find_province_dirs(prov: str | None, slug: str | None) -> List[Path]:
+def find_province_dirs(prov: Optional[str], slug: Optional[str]) -> List[Path]:
     dirs: List[Path] = []
     if prov:
         pname = f'id{prov.zfill(2)}'

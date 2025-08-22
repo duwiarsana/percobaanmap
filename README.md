@@ -179,8 +179,33 @@ Scripts live under `scripts/` and help keep configs accurate and data clean:
     python3 scripts/gen_prov35_config.py
     ```
 
+- **`gen_province_config.py` (generic)**
+  - Scans `public/data/id<prov>_<slug>/` and generates `src/data/prov-<prov>-<slug>.ts` with `districtsFile`, `districts[*].path`, `subdistricts`, and optional `fallbackFile`.
+  - Examples:
+    ```bash
+    # Single province
+    python3 scripts/gen_province_config.py --province 33 --slug jawa_tengah --name "Jawa Tengah" --districts-file /data/kab_33.geojson
+
+    # Custom output path
+    python3 scripts/gen_province_config.py --province 51 --slug bali --name "Bali" \
+      --districts-file /data/kab_51.geojson --out src/data/prov-51-bali.ts
+    ```
+
 - **`make_jawa_timu_kab.py`** (if used)
   - Builds a unified districts GeoJSON for East Java from individual sources for faster loading.
+
+- **`make_kab_dissolved.py`**
+  - Generates dissolved district (kabupaten/kota) boundaries per province into `public/data/kab_<prov>.geojson` by unifying subdistrict geometries for each district.
+  - Requirements: `shapely` (installed via `requirements.txt`).
+  - Usage:
+    ```bash
+    # One province
+    python3 scripts/make_kab_dissolved.py --province 33 --force
+
+    # All provinces discovered under public/data
+    python3 scripts/make_kab_dissolved.py --all --force
+    ```
+  - Output: one FeatureCollection per province with a single polygon/multipolygon feature per district and properties `{ regency_code, province_code, kab_name }`.
 
 - **`fix_geojson.py` / `process_geojson.py` / `optimize_geojson.py`**
   - Utilities to repair malformed GeoJSON (e.g., stray `f{`), validate, or simplify geometries for web delivery.
@@ -189,6 +214,16 @@ Recommended workflow when updating East Java data:
 1. Place/verify district folders under `public/data/id35_jawa_timur/`
 2. Run `python3 scripts/gen_prov35_config.py`
 3. Start the app and click a district to verify subdistrict loads; check console/network if anything fails
+
+### Bulk generation workflow (recommended)
+
+1. Generate dissolved district collections for all provinces:
+   ```bash
+   pip3 install -r requirements.txt
+   python3 scripts/make_kab_dissolved.py --all --force
+   ```
+2. Generate ProvinceConfig modules for all provinces (example loop is baked into tooling/scripts or can be run per province with `gen_province_config.py`).
+3. Ensure `src/data/provinces.ts` imports and registers all generated modules (keys are 2-digit province codes).
 
 ## How to add a new province (systematic workflow)
 
@@ -307,3 +342,11 @@ These changes fix cases where IDs like `01`, `24`, or feature `gid`/`uuid` value
 
 - __District name normalization for Bali filtering__
   - Improved `findDistrictConfig()` in `src/data-config.ts` to normalize names by lowercasing, removing spaces/underscores/hyphens, and stripping diacritics. This resolves rendering gaps where districts like "KARANG ASEM" (Karangasem, 5107) were present in `/data/kab_37.geojson` but accidentally excluded during filtering.
+
+### 2025-08-23
+
+- **Province-wide dissolved districts**
+  - Added `scripts/make_kab_dissolved.py` and generated `public/data/kab_<prov>.geojson` for all 34 provinces (one polygon/multipolygon per district).
+- **Province config generation and registry**
+  - Generated 34 province modules under `src/data/prov-<code>-<slug>.ts` using `scripts/gen_province_config.py` with `districtsFile` pointing to the new `kab_<prov>.geojson` files.
+  - Updated `src/data/provinces.ts` to import and register all provinces.

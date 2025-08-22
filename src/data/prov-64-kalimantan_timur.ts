@@ -1,0 +1,195 @@
+import { ProvinceConfig } from '../types/data-config';
+
+const PROV: ProvinceConfig = {
+  id: '64',
+  name: 'Kalimantan Timur',
+  path: '/data/id64_kalimantan_timur',
+  districtsFile: '/data/kab_64.geojson',
+  districts: {
+    '6401': {
+      id: '6401',
+      name: 'Paser',
+      path: '/data/id64_kalimantan_timur/id6401_paser',
+      subdistricts: [
+        { id: 'id6401010_batu_sopang' },
+        { id: 'id6401011_muara_samu' },
+        { id: 'id6401021_batu_engau' },
+        { id: 'id6401022_tanjung_harapan' },
+        { id: 'id6401030_pasir_belengkong' },
+        { id: 'id6401040_tanah_grogot' },
+        { id: 'id6401050_kuaro' },
+        { id: 'id6401060_long_ikis' },
+        { id: 'id6401070_muara_komam' },
+        { id: 'id6401080_long_kali' },
+      ],
+      fallbackFile: 'id6401_paser.geojson'
+    },
+    '6402': {
+      id: '6402',
+      name: 'Kutai Barat',
+      path: '/data/id64_kalimantan_timur/id6402_kutai_barat',
+      subdistricts: [
+        { id: 'id6402010_bongan' },
+        { id: 'id6402020_jempang' },
+        { id: 'id6402030_penyinggahan' },
+        { id: 'id6402040_muara_pahu' },
+        { id: 'id6402041_siluq_ngurai' },
+        { id: 'id6402050_muara_lawa' },
+        { id: 'id6402051_bentian_besar' },
+        { id: 'id6402060_damai' },
+        { id: 'id6402061_nyuatan' },
+        { id: 'id6402070_barong_tongkok' },
+        { id: 'id6402071_linggang_bigung' },
+        { id: 'id6402080_melak' },
+        { id: 'id6402081_sekolaq_darat' },
+        { id: 'id6402082_manor_bulatn' },
+        { id: 'id6402090_long_iram' },
+        { id: 'id6402091_tering' },
+      ],
+      fallbackFile: 'id6402_kutai_barat.geojson'
+    },
+    '6403': {
+      id: '6403',
+      name: 'Kutai Kartanegara',
+      path: '/data/id64_kalimantan_timur/id6403_kutai_kartanegara',
+      subdistricts: [
+        { id: 'id6403010_semboja' },
+        { id: 'id6403020_muara_jawa' },
+        { id: 'id6403030_sanga_sanga' },
+        { id: 'id6403040_loa_janan' },
+        { id: 'id6403050_loa_kulu' },
+        { id: 'id6403060_muara_muntai' },
+        { id: 'id6403070_muara_wis' },
+        { id: 'id6403080_kotabangun' },
+        { id: 'id6403090_tenggarong' },
+        { id: 'id6403100_sebulu' },
+        { id: 'id6403110_tenggarong_seberang' },
+        { id: 'id6403120_anggana' },
+        { id: 'id6403130_muara_badak' },
+        { id: 'id6403140_marang_kayu' },
+        { id: 'id6403150_muara_kaman' },
+        { id: 'id6403160_kenohan' },
+        { id: 'id6403170_kembang_janggut' },
+        { id: 'id6403180_tabang' },
+      ],
+      fallbackFile: 'id6403_kutai_kartanegara.geojson'
+    },
+    '6404': {
+      id: '6404',
+      name: 'Kutai Timur',
+      path: '/data/id64_kalimantan_timur/id6404_kutai_timur',
+      subdistricts: [
+        { id: 'id6404010_muara_ancalong' },
+        { id: 'id6404011_busang' },
+        { id: 'id6404012_long_mesangat' },
+        { id: 'id6404020_muara_wahau' },
+        { id: 'id6404021_telen' },
+        { id: 'id6404022_kongbeng' },
+        { id: 'id6404030_muara_bengkal' },
+        { id: 'id6404031_batu_ampar' },
+        { id: 'id6404040_sangatta_utara' },
+        { id: 'id6404041_bengalon' },
+        { id: 'id6404042_teluk_pandan' },
+        { id: 'id6404043_sangatta_selatan' },
+        { id: 'id6404044_rantau_pulung' },
+        { id: 'id6404050_sangkulirang' },
+        { id: 'id6404051_kaliorang' },
+        { id: 'id6404052_sandaran' },
+        { id: 'id6404053_kaubun' },
+        { id: 'id6404054_karangan' },
+      ],
+      fallbackFile: 'id6404_kutai_timur.geojson'
+    },
+    '6405': {
+      id: '6405',
+      name: 'Berau',
+      path: '/data/id64_kalimantan_timur/id6405_berau',
+      subdistricts: [
+        { id: 'id6405010_kelay' },
+        { id: 'id6405020_talisayan' },
+        { id: 'id6405021_tabalar' },
+        { id: 'id6405030_biduk_biduk' },
+        { id: 'id6405040_pulau_derawan' },
+        { id: 'id6405041_maratua' },
+        { id: 'id6405050_sambaliung' },
+        { id: 'id6405060_tanjung_redeb' },
+        { id: 'id6405070_gunung_tabur' },
+        { id: 'id6405080_segah' },
+        { id: 'id6405090_teluk_bayur' },
+        { id: 'id6405100_batu_putih' },
+        { id: 'id6405110_biatan' },
+      ],
+      fallbackFile: 'id6405_berau.geojson'
+    },
+    '6409': {
+      id: '6409',
+      name: 'Penajam Paser Utara',
+      path: '/data/id64_kalimantan_timur/id6409_penajam_paser_utara',
+      subdistricts: [
+        { id: 'id6409010_babulu' },
+        { id: 'id6409020_waru' },
+        { id: 'id6409030_penajam' },
+        { id: 'id6409040_sepaku' },
+      ],
+      fallbackFile: 'id6409_penajam_paser_utara.geojson'
+    },
+    '6411': {
+      id: '6411',
+      name: 'Mahakam Hulu',
+      path: '/data/id64_kalimantan_timur/id6411_mahakam_hulu',
+      subdistricts: [
+        { id: 'id6411010_laham' },
+        { id: 'id6411020_long_hubung' },
+        { id: 'id6411030_long_bagun' },
+        { id: 'id6411040_long_pahangai' },
+        { id: 'id6411050_long_apari' },
+      ],
+      fallbackFile: 'id6411_mahakam_hulu.geojson'
+    },
+    '6471': {
+      id: '6471',
+      name: 'Kota Balikpapan',
+      path: '/data/id64_kalimantan_timur/id6471_kota_balikpapan',
+      subdistricts: [
+        { id: 'id6471010_balikpapan_selatan' },
+        { id: 'id6471011_balikpapan_kota' },
+        { id: 'id6471020_balikpapan_timur' },
+        { id: 'id6471030_balikpapan_utara' },
+        { id: 'id6471040_balikpapan_tengah' },
+        { id: 'id6471050_balikpapan_barat' },
+      ],
+      fallbackFile: 'id6471_kota_balikpapan.geojson'
+    },
+    '6472': {
+      id: '6472',
+      name: 'Kota Samarinda',
+      path: '/data/id64_kalimantan_timur/id6472_kota_samarinda',
+      subdistricts: [
+        { id: 'id6472010_palaran' },
+        { id: 'id6472020_samarinda_ilir' },
+        { id: 'id6472021_samarinda_kota' },
+        { id: 'id6472022_sambutan' },
+        { id: 'id6472030_samarinda_seberang' },
+        { id: 'id6472031_loa_janan_ilir' },
+        { id: 'id6472040_sungai_kunjang' },
+        { id: 'id6472050_samarinda_ulu' },
+        { id: 'id6472060_samarinda_utara' },
+        { id: 'id6472061_sungai_pinang' },
+      ],
+      fallbackFile: 'id6472_kota_samarinda.geojson'
+    },
+    '6474': {
+      id: '6474',
+      name: 'Kota Bontang',
+      path: '/data/id64_kalimantan_timur/id6474_kota_bontang',
+      subdistricts: [
+        { id: 'id6474010_bontang_selatan' },
+        { id: 'id6474020_bontang_utara' },
+        { id: 'id6474030_bontang_barat' },
+      ],
+      fallbackFile: 'id6474_kota_bontang.geojson'
+    },
+  }
+};
+
+export default PROV;

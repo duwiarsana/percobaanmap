@@ -210,7 +210,7 @@ const PROV: ProvinceConfig = {
     },
     '3308': {
       id: '3308',
-      name: 'Kabupaten Magelang',
+      name: 'Magelang',
       path: '/data/id33_jawa_tengah/id3308_magelang',
       subdistricts: [
         { id: 'id3308010_salaman' },
@@ -572,7 +572,7 @@ const PROV: ProvinceConfig = {
     },
     '3322': {
       id: '3322',
-      name: 'Kabupaten Semarang',
+      name: 'Semarang',
       path: '/data/id33_jawa_tengah/id3322_semarang',
       subdistricts: [
         { id: 'id3322010_getasan' },
@@ -679,7 +679,7 @@ const PROV: ProvinceConfig = {
     },
     '3326': {
       id: '3326',
-      name: 'Kabupaten Pekalongan',
+      name: 'Pekalongan',
       path: '/data/id33_jawa_tengah/id3326_pekalongan',
       subdistricts: [
         { id: 'id3326010_kandangserang' },
@@ -728,7 +728,7 @@ const PROV: ProvinceConfig = {
     },
     '3328': {
       id: '3328',
-      name: 'Kabupaten Tegal',
+      name: 'Tegal',
       path: '/data/id33_jawa_tengah/id3328_tegal',
       subdistricts: [
         { id: 'id3328010_margasari' },
