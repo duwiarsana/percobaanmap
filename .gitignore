@@ -1,0 +1,59 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node / JavaScript
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build / Dist / Cache
+build/
+dist/
+.cache/
+**/build/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.*.local
+
+# Large data directories (do not commit)
+geojsonKecamatan/**
+indonesia-district-master/**
+indonesia-district-master 3/**
+optimized_geojson/**
+id51_bali/**
+
+# Large standalone GeoJSON at root
+kab 37.geojson
+prov 37.geojson
+
+# App-specific large assets to exclude from VCS
+indonesia-map-viewer/public/kec.geojson
+indonesia-map-viewer/build/kec.geojson
+
+# CRA / React app build outputs inside subproject
+indonesia-map-viewer/build/
+
+# Logs
+logs/
+*.log
+
+# Misc
+*.bak
+*.backup
+*.old
