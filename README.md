@@ -145,6 +145,51 @@ This section documents how the React map loads and renders boundaries at each le
 
 This mechanism ensures Bali behaves like other provinces at province level (only districts shown) while still loading subdistricts correctly on district selection.
 
+## Data-driven Configuration and Loaders
+
+This project uses a data-driven configuration to remove fragile if/else blocks and centralize province/district metadata.
+
+- **Configs**
+  - `src/data-config.ts` and `src/types/data-config.ts` define the schema and expose helpers:
+    - `DATA_CONFIG`: per-province config map
+    - `findDistrictConfig(idOrName)`: robust lookup by 4-digit code, UUID, name, or alternative IDs
+  - Province modules under `src/data/` (e.g., `prov-35-jawa-timur.ts`) provide full district listings with:
+    - `districtsFile`: districts collection URL for the province
+    - `districts[code].path`: base folder for kecamatan files
+    - `districts[code].subdistricts`: list of file basenames (no `.geojson`)
+    - `districts[code].fallbackFile`: optional combined-geojson fallback
+
+- **Loaders**
+  - `src/map/handlers.ts`: resolves a canonical 4-digit regency/city ID on district click
+  - `src/data-loader.ts`: loads each subdistrict file, enhances properties, and falls back to the district’s combined file when needed
+
+For a deeper dive, see `scripts/DATA_LOADING_LOGIC.md`.
+
+## Generator and Utility Scripts
+
+Scripts live under `scripts/` and help keep configs accurate and data clean:
+
+- **`gen_prov35_config.py`**
+  - Scans `public/data/id35_jawa_timur/` to auto-generate `src/data/prov-35-jawa-timur.ts` with:
+    - `path` to each district folder (e.g., `/data/id35_jawa_timur/id3510_banyuwangi`)
+    - full `subdistricts` list (file basenames)
+    - `fallbackFile` if present (e.g., `id3510_banyuwangi.geojson`)
+  - Usage:
+    ```bash
+    python3 scripts/gen_prov35_config.py
+    ```
+
+- **`make_jawa_timu_kab.py`** (if used)
+  - Builds a unified districts GeoJSON for East Java from individual sources for faster loading.
+
+- **`fix_geojson.py` / `process_geojson.py` / `optimize_geojson.py`**
+  - Utilities to repair malformed GeoJSON (e.g., stray `f{`), validate, or simplify geometries for web delivery.
+
+Recommended workflow when updating East Java data:
+1. Place/verify district folders under `public/data/id35_jawa_timur/`
+2. Run `python3 scripts/gen_prov35_config.py`
+3. Start the app and click a district to verify subdistrict loads; check console/network if anything fails
+
 ## Data Submodule and Git LFS Workflow
 
 If this project relies on large geospatial files under `public/data/`, those files are managed in a separate Git repository using Git submodules and Git LFS.
