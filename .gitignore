@@ -11,6 +11,9 @@
 # production
 /build
 
+# large app assets
+/public/kec.geojson
+
 # misc
 .DS_Store
 .env.local
