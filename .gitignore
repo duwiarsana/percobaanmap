@@ -14,6 +14,25 @@
 # large app assets
 /public/kec.geojson
 
+# --- Project-specific large data and temp assets ---
+# prevent accidental commits of bulk GeoJSON datasets and archives
+/public/data/
+/geojsonKecamatan/
+/optimized_geojson/
+/id51_bali/
+public/data/PercobaanMap.zip
+
+# standalone large GeoJSON samples
+kab\ 37.geojson
+prov\ 37.geojson
+
+# nested repositories (keep as submodules or separate repos)
+/indonesia-map-viewer/
+indonesia-district-master\ 3/
+
+# Python virtual environment
+/venv/
+
 # misc
 .DS_Store
 .env.local
