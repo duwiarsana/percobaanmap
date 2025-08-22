@@ -1,3 +1,5 @@
+# Combined .gitignore (resolved)
+
 # OS / Editor
 .DS_Store
 Thumbs.db
@@ -30,6 +32,10 @@ dist/
 # Environment
 .env
 .env.*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Large data directories (do not commit)
 geojsonKecamatan/**
@@ -41,13 +47,16 @@ id51_bali/**
 # Large standalone GeoJSON at root
 kab 37.geojson
 prov 37.geojson
+kab\ 37.geojson
+prov\ 37.geojson
 
-# App-specific large assets to exclude from VCS
+# App-specific large assets to exclude from VCS (subproject paths)
 indonesia-map-viewer/public/kec.geojson
 indonesia-map-viewer/build/kec.geojson
-
-# CRA / React app build outputs inside subproject
 indonesia-map-viewer/build/
+
+# Project-specific archives
+public/data/PercobaanMap.zip
 
 # Logs
 logs/

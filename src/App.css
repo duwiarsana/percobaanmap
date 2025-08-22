@@ -1,0 +1,366 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Header Styles */
+.app-header {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo-icon {
+  font-size: 28px;
+  margin-right: 12px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.map-container {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.footer {
+  background-color: #f3f4f6;
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #4b5563;
+  border-top: 1px solid #e5e7eb;
+}
+
+.loading, .error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 1rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+/* Breadcrumb Navigation Styles */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 6px 12px;
+  border-radius: 20px;
+  backdrop-filter: blur(5px);
+}
+
+.breadcrumb-item {
+  color: #ffffff;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  padding: 2px 4px;
+  font-size: 15px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+}
+
+.breadcrumb-item:hover {
+  color: #ffffff;
+  text-decoration: underline;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.breadcrumb-separator {
+  margin: 0 8px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.breadcrumb-item.current {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 15px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+/* Info Panel Styles */
+.info-panel {
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 8px 15px;
+  border-radius: 20px;
+  backdrop-filter: blur(5px);
+  font-size: 14px;
+  color: white;
+  min-width: 200px;
+  text-align: right;
+}
+
+.info-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.info-item {
+  margin: 4px 0;
+  white-space: nowrap;
+}
+
+.info-item strong {
+  font-weight: 600;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+.error {
+  color: #dc2626;
+  border-left: 4px solid #dc2626;
+}
+
+.loading {
+  color: #1e40af;
+  border-left: 4px solid #1e40af;
+}
+
+/* General App styling */
+
+.district-tooltip {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: 1px solid white;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Leaflet custom styles */
+.leaflet-popup-content-wrapper {
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content {
+  margin: 0.75rem 1rem;
+  line-height: 1.5;
+}
+
+.leaflet-popup-content h3 {
+  margin: 0 0 0.5rem 0;
+  color: #1e40af;
+  font-size: 1.125rem;
+}
+
+.leaflet-popup-content p {
+  margin: 0.25rem 0;
+  color: #4b5563;
+}
+
+.leaflet-tooltip {
+  background-color: rgba(255, 255, 255, 0.95);
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  color: #1e3a8a;
+  font-weight: bold;
+  padding: 0.4rem 0.6rem;
+  text-align: center;
+  white-space: nowrap;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 1);
+  border-radius: 4px;
+}
+
+.kecamatan-tooltip {
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 2px solid #1e40af;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #1e40af;
+  padding: 0.5rem 0.7rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1500;
+}
+
+.province-tooltip {
+  font-size: 0.85rem;
+  pointer-events: none;
+  z-index: 1000 !important;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 1);
+  font-weight: 600;
+  border: 1px solid rgba(30, 58, 138, 0.3);
+}
+
+.district-tooltip {
+  font-size: 0.75rem;
+  pointer-events: none;
+  z-index: 1000 !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  background-color: rgba(74, 74, 74, 0.95);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 0.25rem 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.custom-tooltip-label {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 12px;
+  font-weight: bold;
+  color: #000;
+  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1000 !important;
+}
+
+.hover-tooltip {
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  border: 2px solid white !important;
+  border-radius: 4px !important;
+  color: white !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  padding: 6px 12px !important;
+  pointer-events: none !important;
+  z-index: 2000 !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6) !important;
+  text-align: center !important;
+  min-width: 80px !important;
+  transform: translateY(-10px) !important;
+  animation: tooltipFadeIn 0.2s ease-out !important;
+  transition: transform 0.2s ease-out !important;
+  margin-top: -20px !important;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-10px);
+  }
+}
+
+.selected-district-info {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 5px 15px;
+  border-radius: 4px;
+  z-index: 1500;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.selected-district-info h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
+.district-loading, .district-error {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 1rem;
+  background-color: white;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.district-error {
+  color: #dc2626;
+  border-left: 4px solid #dc2626;
+}
+
+.district-loading {
+  color: #10b981;
+  border-left: 4px solid #10b981;
+}
+
+/* Remove blue outline from map */
+.leaflet-container {
+  outline: none !important;
+  border: none !important;
+}
+
+.leaflet-pane {
+  outline: none !important;
+  border: none !important;
+}
+
+/* Remove any blue selection boxes */
+.leaflet-interactive {
+  outline: none !important;
+}
