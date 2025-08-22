@@ -135,7 +135,7 @@ const MapController: React.FC<{
         try {
           let response;
           try {
-            response = await fetch('/data/prov 37.geojson');
+            response = await fetch('/data/prov_37.geojson');
             if (!response.ok) throw new Error('Fixed file not found');
           } catch (e) {
             response = await fetch('/data/prov_37.geojson');
@@ -190,7 +190,7 @@ const MapController: React.FC<{
             let response;
             try {
               // Try the fixed file first
-              response = await fetch('/data/kab 37.geojson');
+              response = await fetch('/data/kab_37.geojson');
               if (!response.ok) throw new Error('Fixed file not found');
             } catch (e) {
               // Fall back to the simplified file
@@ -376,14 +376,14 @@ const MapController: React.FC<{
         try {
           console.log(`Loading kecamatan: ${kecamatan}`);
           // Coba beberapa path yang mungkin untuk file kecamatan
-          let url = `/data/bali/tabanan/${kecamatan}.geojson`;
+          let url = `/data/id51_bali/id5102_tabanan/${kecamatan}.geojson`;
           console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
           let response = await fetch(url);
           console.log(`First attempt status: ${response.status} ${response.statusText}`);
           
           // Jika tidak berhasil, coba path alternatif
           if (!response.ok) {
-            url = `/indonesia-district-master 3/id51_bali/id5102_tabanan/${kecamatan}.geojson`;
+            url = `/data/id51_bali/id5102_tabanan/${kecamatan}.geojson`;
             console.log(`[${new Date().toISOString()}] Second attempt to fetch: ${url}`);
             response = await fetch(url);
             console.log(`Second attempt status: ${response.status} ${response.statusText}`);
@@ -391,7 +391,7 @@ const MapController: React.FC<{
           
           // Jika masih tidak berhasil, coba path alternatif lain
           if (!response.ok) {
-            url = `/id51_bali/id5102_tabanan/${kecamatan}.geojson`;
+            url = `/data/id51_bali/id5102_tabanan/${kecamatan}.geojson`;
             console.log(`[${new Date().toISOString()}] Third attempt to fetch: ${url}`);
             response = await fetch(url);
             console.log(`Third attempt status: ${response.status} ${response.statusText}`);
@@ -399,7 +399,7 @@ const MapController: React.FC<{
           
           // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
           if (!response.ok) {
-            url = `/geojsonKecamatan/id51_bali/id5102_tabanan/${kecamatan}.geojson`;
+            url = `/data/id51_bali/id5102_tabanan/${kecamatan}.geojson`;
             console.log(`[${new Date().toISOString()}] Fourth attempt to fetch: ${url}`);
             response = await fetch(url);
             console.log(`Fourth attempt status: ${response.status} ${response.statusText}`);
@@ -451,14 +451,14 @@ const MapController: React.FC<{
       console.log('No kecamatan files loaded for Tabanan, falling back to district file');
       
       // Coba beberapa path yang mungkin untuk file district
-      let url = '/data/bali/tabanan/id5102_tabanan.geojson';
+      let url = '/data/id51_bali/id5102_tabanan/id5102_tabanan.geojson';
       console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
       let response = await fetch(url);
       console.log(`First district attempt status: ${response.status} ${response.statusText}`);
       
       // Jika tidak berhasil, coba path alternatif
       if (!response.ok) {
-        url = '/indonesia-district-master 3/id51_bali/id5102_tabanan/id5102_tabanan.geojson';
+        url = '/data/id51_bali/id5102_tabanan/id5102_tabanan.geojson';
         console.log(`[${new Date().toISOString()}] Second attempt to fetch district file: ${url}`);
         response = await fetch(url);
         console.log(`Second district attempt status: ${response.status} ${response.statusText}`);
@@ -466,7 +466,7 @@ const MapController: React.FC<{
       
       // Jika masih tidak berhasil, coba path alternatif lain
       if (!response.ok) {
-        url = '/id51_bali/id5102_tabanan/id5102_tabanan.geojson';
+        url = '/data/id51_bali/id5102_tabanan/id5102_tabanan.geojson';
         console.log(`[${new Date().toISOString()}] Third attempt to fetch district file: ${url}`);
         response = await fetch(url);
         console.log(`Third district attempt status: ${response.status} ${response.statusText}`);
@@ -474,7 +474,7 @@ const MapController: React.FC<{
       
       // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
       if (!response.ok) {
-        url = '/geojsonKecamatan/id51_bali/id5102_tabanan/id5102_tabanan.geojson';
+        url = '/data/id51_bali/id5102_tabanan/id5102_tabanan.geojson';
         console.log(`[${new Date().toISOString()}] Fourth attempt to fetch district file: ${url}`);
         response = await fetch(url);
         console.log(`Fourth district attempt status: ${response.status} ${response.statusText}`);
@@ -524,14 +524,14 @@ const MapController: React.FC<{
         try {
           console.log(`Loading kecamatan: ${kecamatan}`);
           // Coba beberapa path yang mungkin untuk file kecamatan
-          let url = `/data/bali/jembrana/${kecamatan}.geojson`;
+          let url = `/data/id51_bali/id5101_jembrana/${kecamatan}.geojson`;
           console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
           let response = await fetch(url);
           console.log(`First attempt status: ${response.status} ${response.statusText}`);
           
           // Jika tidak berhasil, coba path alternatif
           if (!response.ok) {
-            url = `/indonesia-district-master 3/id51_bali/id5101_jembrana/${kecamatan}.geojson`;
+            url = `/data/id51_bali/id5101_jembrana/${kecamatan}.geojson`;
             console.log(`[${new Date().toISOString()}] Second attempt to fetch: ${url}`);
             response = await fetch(url);
             console.log(`Second attempt status: ${response.status} ${response.statusText}`);
@@ -539,7 +539,7 @@ const MapController: React.FC<{
           
           // Jika masih tidak berhasil, coba path alternatif lain
           if (!response.ok) {
-            url = `/id51_bali/id5101_jembrana/${kecamatan}.geojson`;
+            url = `/data/id51_bali/id5101_jembrana/${kecamatan}.geojson`;
             console.log(`[${new Date().toISOString()}] Third attempt to fetch: ${url}`);
             response = await fetch(url);
             console.log(`Third attempt status: ${response.status} ${response.statusText}`);
@@ -547,7 +547,7 @@ const MapController: React.FC<{
           
           // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
           if (!response.ok) {
-            url = `/geojsonKecamatan/id51_bali/id5101_jembrana/${kecamatan}.geojson`;
+            url = `/data/id51_bali/id5101_jembrana/${kecamatan}.geojson`;
             console.log(`[${new Date().toISOString()}] Fourth attempt to fetch: ${url}`);
             response = await fetch(url);
             console.log(`Fourth attempt status: ${response.status} ${response.statusText}`);
@@ -605,14 +605,14 @@ const MapController: React.FC<{
       console.log('No kecamatan files loaded for Jembrana, falling back to district file');
       
       // Coba beberapa path yang mungkin untuk file district
-      let url = '/data/bali/jembrana/id5101_jembrana.geojson';
+      let url = '/data/id51_bali/id5101_jembrana/id5101_jembrana.geojson';
       console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
       let response = await fetch(url);
       console.log(`First district attempt status: ${response.status} ${response.statusText}`);
       
       // Jika tidak berhasil, coba path alternatif
       if (!response.ok) {
-        url = '/indonesia-district-master 3/id51_bali/id5101_jembrana/id5101_jembrana.geojson';
+        url = '/data/id51_bali/id5101_jembrana/id5101_jembrana.geojson';
         console.log(`[${new Date().toISOString()}] Second attempt to fetch district file: ${url}`);
         response = await fetch(url);
         console.log(`Second district attempt status: ${response.status} ${response.statusText}`);
@@ -620,7 +620,7 @@ const MapController: React.FC<{
       
       // Jika masih tidak berhasil, coba path alternatif lain
       if (!response.ok) {
-        url = '/id51_bali/id5101_jembrana/id5101_jembrana.geojson';
+        url = '/data/id51_bali/id5101_jembrana/id5101_jembrana.geojson';
         console.log(`[${new Date().toISOString()}] Third attempt to fetch district file: ${url}`);
         response = await fetch(url);
         console.log(`Third district attempt status: ${response.status} ${response.statusText}`);
@@ -628,7 +628,7 @@ const MapController: React.FC<{
       
       // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
       if (!response.ok) {
-        url = '/geojsonKecamatan/id51_bali/id5101_jembrana/id5101_jembrana.geojson';
+        url = '/data/id51_bali/id5101_jembrana/id5101_jembrana.geojson';
         console.log(`[${new Date().toISOString()}] Fourth attempt to fetch district file: ${url}`);
         response = await fetch(url);
         console.log(`Fourth district attempt status: ${response.status} ${response.statusText}`);
@@ -698,14 +698,14 @@ const MapController: React.FC<{
         try {
           console.log(`Loading kecamatan: ${kecamatan}`);
           // Coba beberapa path yang mungkin untuk file kecamatan
-          let url = `/data/jawa_timur/banyuwangi/${kecamatan}.geojson`;
+          let url = `/data/subdistricts/id3510_banyuwangi/${kecamatan}.geojson`;
           console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
           let response = await fetch(url);
           console.log(`First attempt status: ${response.status} ${response.statusText}`);
           
           // Jika tidak berhasil, coba path alternatif
           if (!response.ok) {
-            url = `/indonesia-district-master 3/id35_jawa_timur/id3510_banyuwangi/${kecamatan}.geojson`;
+            url = `/data/subdistricts/id3510_banyuwangi/${kecamatan}.geojson`;
             console.log(`[${new Date().toISOString()}] Second attempt to fetch: ${url}`);
             response = await fetch(url);
             console.log(`Second attempt status: ${response.status} ${response.statusText}`);
@@ -713,7 +713,7 @@ const MapController: React.FC<{
           
           // Jika masih tidak berhasil, coba path alternatif lain
           if (!response.ok) {
-            url = `/geojsonKecamatan/id35_jawa_timur/id3510_banyuwangi/${kecamatan}.geojson`;
+            url = `/data/subdistricts/id3510_banyuwangi/${kecamatan}.geojson`;
             console.log(`[${new Date().toISOString()}] Third attempt to fetch: ${url}`);
             response = await fetch(url);
             console.log(`Third attempt status: ${response.status} ${response.statusText}`);
@@ -771,14 +771,14 @@ const MapController: React.FC<{
       console.log('No kecamatan files loaded for Banyuwangi, falling back to district file');
       
       // Coba beberapa path yang mungkin untuk file district
-      let url = '/data/jawa_timur/banyuwangi/id3510_banyuwangi.geojson';
+      let url = '/data/subdistricts/id3510_banyuwangi/id3510_banyuwangi.geojson';
       console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
       let response = await fetch(url);
       console.log(`First district attempt status: ${response.status} ${response.statusText}`);
       
       // Jika tidak berhasil, coba path alternatif
       if (!response.ok) {
-        url = '/indonesia-district-master 3/id35_jawa_timur/id3510_banyuwangi/id3510_banyuwangi.geojson';
+        url = '/data/subdistricts/id3510_banyuwangi/id3510_banyuwangi.geojson';
         console.log(`[${new Date().toISOString()}] Second attempt to fetch district file: ${url}`);
         response = await fetch(url);
         console.log(`Second district attempt status: ${response.status} ${response.statusText}`);
@@ -786,7 +786,7 @@ const MapController: React.FC<{
       
       // Jika masih tidak berhasil, coba path alternatif lain
       if (!response.ok) {
-        url = '/geojsonKecamatan/id35_jawa_timur/id3510_banyuwangi/id3510_banyuwangi.geojson';
+        url = '/data/subdistricts/id3510_banyuwangi/id3510_banyuwangi.geojson';
         console.log(`[${new Date().toISOString()}] Third attempt to fetch district file: ${url}`);
         response = await fetch(url);
         console.log(`Third district attempt status: ${response.status} ${response.statusText}`);
@@ -840,7 +840,7 @@ const MapController: React.FC<{
         try {
           console.log(`Loading kecamatan: ${kecamatan}`);
           // Coba beberapa path yang mungkin untuk file kecamatan
-          let url = `/data/bali/buleleng/${kecamatan}.geojson`;
+          let url = `/data/id51_bali/id5108_buleleng/${kecamatan}.geojson`;
           console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
           let response = await fetch(url);
           console.log(`First attempt status: ${response.status} ${response.statusText}`);
@@ -921,7 +921,7 @@ const MapController: React.FC<{
       console.log('No kecamatan files loaded for Buleleng, falling back to district file');
       
       // Coba beberapa path yang mungkin untuk file district
-      let url = '/data/bali/buleleng/id5108_buleleng.geojson';
+      let url = '/data/id51_bali/id5108_buleleng/id5108_buleleng.geojson';
       console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
       let response = await fetch(url);
       console.log(`First district attempt status: ${response.status} ${response.statusText}`);
@@ -993,7 +993,7 @@ const MapController: React.FC<{
         try {
           console.log(`Loading kecamatan: ${kecamatan}`);
           // Coba beberapa path yang mungkin untuk file kecamatan
-          let url = `/data/bali/klungkung/${kecamatan}.geojson`;
+          let url = `/data/id51_bali/id5105_klungkung/${kecamatan}.geojson`;
           console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
           let response = await fetch(url);
           console.log(`First attempt status: ${response.status} ${response.statusText}`);
@@ -1102,7 +1102,7 @@ const MapController: React.FC<{
       console.log('No kecamatan files loaded for Klungkung, falling back to district file');
       
       // Coba beberapa path yang mungkin untuk file district
-      let url = '/data/bali/klungkung/id5105_klungkung.geojson';
+      let url = '/data/id51_bali/id5105_klungkung/id5105_klungkung.geojson';
       console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
       let response = await fetch(url);
       console.log(`First district attempt status: ${response.status} ${response.statusText}`);
@@ -1174,7 +1174,7 @@ const MapController: React.FC<{
         try {
           console.log(`Loading kecamatan: ${kecamatan}`);
           // Coba beberapa path yang mungkin untuk file kecamatan
-          let url = `/data/bali/bangli/${kecamatan}.geojson`;
+          let url = `/data/id51_bali/id5106_bangli/${kecamatan}.geojson`;
           console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
           let response = await fetch(url);
           console.log(`First attempt status: ${response.status} ${response.statusText}`);
@@ -1283,7 +1283,7 @@ const MapController: React.FC<{
       console.log('No kecamatan files loaded for Bangli, falling back to district file');
       
       // Coba beberapa path yang mungkin untuk file district
-      let url = '/data/bali/bangli/id5106_bangli.geojson';
+      let url = '/data/id51_bali/id5106_bangli/id5106_bangli.geojson';
       console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
       let response = await fetch(url);
       console.log(`First district attempt status: ${response.status} ${response.statusText}`);
@@ -1357,14 +1357,14 @@ const MapController: React.FC<{
         try {
           console.log(`Loading kecamatan: ${kecamatan}`);
           // Coba beberapa path yang mungkin untuk file kecamatan
-          let url = `/data/bali/badung/${kecamatan}.geojson`;
+          let url = `/data/id51_bali/id5103_badung/${kecamatan}.geojson`;
           console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
           let response = await fetch(url);
           console.log(`First attempt status: ${response.status} ${response.statusText}`);
           
           // Jika tidak berhasil, coba path alternatif
           if (!response.ok) {
-            url = `/indonesia-district-master 3/id51_bali/id5103_badung/${kecamatan}.geojson`;
+            url = `/data/id51_bali/id5103_badung/${kecamatan}.geojson`;
             console.log(`[${new Date().toISOString()}] Second attempt to fetch: ${url}`);
             response = await fetch(url);
             console.log(`Second attempt status: ${response.status} ${response.statusText}`);
@@ -1372,7 +1372,7 @@ const MapController: React.FC<{
           
           // Jika masih tidak berhasil, coba path alternatif lain
           if (!response.ok) {
-            url = `/id51_bali/id5103_badung/${kecamatan}.geojson`;
+            url = `/data/id51_bali/id5103_badung/${kecamatan}.geojson`;
             console.log(`[${new Date().toISOString()}] Third attempt to fetch: ${url}`);
             response = await fetch(url);
             console.log(`Third attempt status: ${response.status} ${response.statusText}`);
@@ -1380,7 +1380,7 @@ const MapController: React.FC<{
           
           // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
           if (!response.ok) {
-            url = `/geojsonKecamatan/id51_bali/id5103_badung/${kecamatan}.geojson`;
+            url = `/data/id51_bali/id5103_badung/${kecamatan}.geojson`;
             console.log(`[${new Date().toISOString()}] Fourth attempt to fetch: ${url}`);
             response = await fetch(url);
             console.log(`Fourth attempt status: ${response.status} ${response.statusText}`);
@@ -1466,14 +1466,14 @@ const MapController: React.FC<{
       console.log('No kecamatan files loaded for Badung, falling back to district file');
       
       // Coba beberapa path yang mungkin untuk file district
-      let url = '/data/bali/badung/id5103_badung.geojson';
+      let url = '/data/id51_bali/id5103_badung/id5103_badung.geojson';
       console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
       let response = await fetch(url);
       console.log(`First district attempt status: ${response.status} ${response.statusText}`);
       
       // Jika tidak berhasil, coba path alternatif
       if (!response.ok) {
-        url = '/indonesia-district-master 3/id51_bali/id5103_badung/id5103_badung.geojson';
+        url = '/data/id51_bali/id5103_badung/id5103_badung.geojson';
         console.log(`[${new Date().toISOString()}] Second attempt to fetch district file: ${url}`);
         response = await fetch(url);
         console.log(`Second district attempt status: ${response.status} ${response.statusText}`);
@@ -1481,7 +1481,7 @@ const MapController: React.FC<{
       
       // Jika masih tidak berhasil, coba path alternatif lain
       if (!response.ok) {
-        url = '/id51_bali/id5103_badung/id5103_badung.geojson';
+        url = '/data/id51_bali/id5103_badung/id5103_badung.geojson';
         console.log(`[${new Date().toISOString()}] Third attempt to fetch district file: ${url}`);
         response = await fetch(url);
         console.log(`Third district attempt status: ${response.status} ${response.statusText}`);
@@ -1489,7 +1489,7 @@ const MapController: React.FC<{
       
       // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
       if (!response.ok) {
-        url = '/geojsonKecamatan/id51_bali/id5103_badung/id5103_badung.geojson';
+        url = '/data/id51_bali/id5103_badung/id5103_badung.geojson';
         console.log(`[${new Date().toISOString()}] Fourth attempt to fetch district file: ${url}`);
         response = await fetch(url);
         console.log(`Fourth district attempt status: ${response.status} ${response.statusText}`);
@@ -1600,9 +1600,9 @@ const MapController: React.FC<{
             try {
               console.log(`Loading kecamatan: ${kecamatan}`);
               // Ensure we're using the correct path with proper encoding
-              const url = `/data/bali/${kecamatan}.geojson`;
+              const url = `/data/id51_bali/id5107_karang_asem/${kecamatan}.geojson`;
               console.log(`Attempting to fetch: ${url}`);
-              const response = await fetch(`/data/bali/${kecamatan}.geojson`);
+              const response = await fetch(`/data/id51_bali/id5107_karang_asem/${kecamatan}.geojson`);
               
               if (!response.ok) {
                 console.error(`HTTP error ${response.status} for ${kecamatan}: ${response.statusText}`);
@@ -1703,7 +1703,7 @@ const MapController: React.FC<{
           for (const kecamatan of kecamatanFiles) {
             try {
               console.log(`Loading kecamatan: ${kecamatan}`);
-              const url = `/data/bali/denpasar/${kecamatan}.geojson`;
+              const url = `/data/id51_bali/id5171_kota_denpasar/${kecamatan}.geojson`;
               console.log(`Attempting to fetch: ${url}`);
               const response = await fetch(url);
               
@@ -1781,7 +1781,7 @@ const MapController: React.FC<{
             // Fall back to loading the district data and creating simulated kecamatan
             try {
               console.log('Falling back to district data for Denpasar');
-              const response = await fetch('/data/bali/denpasar/id5171_kota_denpasar.geojson');
+              const response = await fetch('/data/id51_bali/id5171_kota_denpasar/id5171_kota_denpasar.geojson');
               
               if (!response.ok) throw new Error('District file not found');
               const text = await response.text();
@@ -1867,14 +1867,14 @@ const MapController: React.FC<{
             try {
               console.log(`Loading kecamatan: ${kecamatan}`);
               // Coba beberapa path yang mungkin untuk file kecamatan
-              let url = `/data/bali/badung/${kecamatan}.geojson`;
+              let url = `/data/id51_bali/id5103_badung/${kecamatan}.geojson`;
               console.log(`[${new Date().toISOString()}] First attempt to fetch: ${url}`);
               let response = await fetch(url);
               console.log(`First attempt status: ${response.status} ${response.statusText}`);
               
               // Jika tidak berhasil, coba path alternatif
               if (!response.ok) {
-                url = `/indonesia-district-master 3/id51_bali/id5103_badung/${kecamatan}.geojson`;
+                url = `/data/id51_bali/id5103_badung/${kecamatan}.geojson`;
                 console.log(`[${new Date().toISOString()}] Second attempt to fetch: ${url}`);
                 response = await fetch(url);
                 console.log(`Second attempt status: ${response.status} ${response.statusText}`);
@@ -1882,7 +1882,7 @@ const MapController: React.FC<{
               
               // Jika masih tidak berhasil, coba path alternatif lain
               if (!response.ok) {
-                url = `/id51_bali/id5103_badung/${kecamatan}.geojson`;
+                url = `/data/id51_bali/id5103_badung/${kecamatan}.geojson`;
                 console.log(`[${new Date().toISOString()}] Third attempt to fetch: ${url}`);
                 response = await fetch(url);
                 console.log(`Third attempt status: ${response.status} ${response.statusText}`);
@@ -1890,7 +1890,7 @@ const MapController: React.FC<{
               
               // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
               if (!response.ok) {
-                url = `/geojsonKecamatan/id51_bali/id5103_badung/${kecamatan}.geojson`;
+                url = `/data/id51_bali/id5103_badung/${kecamatan}.geojson`;
                 console.log(`[${new Date().toISOString()}] Fourth attempt to fetch: ${url}`);
                 response = await fetch(url);
                 console.log(`Fourth attempt status: ${response.status} ${response.statusText}`);
@@ -1974,14 +1974,14 @@ const MapController: React.FC<{
           console.log('No kecamatan files loaded for Badung, falling back to district file');
           
           // Coba beberapa path yang mungkin untuk file district
-          let url = '/data/bali/badung/id5103_badung.geojson';
+          let url = '/data/id51_bali/id5103_badung/id5103_badung.geojson';
           console.log(`[${new Date().toISOString()}] First attempt to fetch district file: ${url}`);
           let response = await fetch(url);
           console.log(`First district attempt status: ${response.status} ${response.statusText}`);
           
           // Jika tidak berhasil, coba path alternatif
           if (!response.ok) {
-            url = '/indonesia-district-master 3/id51_bali/id5103_badung/id5103_badung.geojson';
+            url = '/data/id51_bali/id5103_badung/id5103_badung.geojson';
             console.log(`[${new Date().toISOString()}] Second attempt to fetch district file: ${url}`);
             response = await fetch(url);
             console.log(`Second district attempt status: ${response.status} ${response.statusText}`);
@@ -1989,7 +1989,7 @@ const MapController: React.FC<{
           
           // Jika masih tidak berhasil, coba path alternatif lain
           if (!response.ok) {
-            url = '/id51_bali/id5103_badung/id5103_badung.geojson';
+            url = '/data/id51_bali/id5103_badung/id5103_badung.geojson';
             console.log(`[${new Date().toISOString()}] Third attempt to fetch district file: ${url}`);
             response = await fetch(url);
             console.log(`Third district attempt status: ${response.status} ${response.statusText}`);
@@ -1997,7 +1997,7 @@ const MapController: React.FC<{
           
           // Jika masih tidak berhasil, coba path alternatif dengan folder geojsonKecamatan
           if (!response.ok) {
-            url = '/geojsonKecamatan/id51_bali/id5103_badung/id5103_badung.geojson';
+            url = '/data/id51_bali/id5103_badung/id5103_badung.geojson';
             console.log(`[${new Date().toISOString()}] Fourth attempt to fetch district file: ${url}`);
             response = await fetch(url);
             console.log(`Fourth district attempt status: ${response.status} ${response.statusText}`);
@@ -2088,7 +2088,7 @@ const MapController: React.FC<{
           for (const kecamatan of kecamatanFiles) {
             try {
               console.log(`Loading kecamatan: ${kecamatan}`);
-              const url = `/data/bali/gianyar/${kecamatan}.geojson`;
+              const url = `/data/id51_bali/id5104_gianyar/${kecamatan}.geojson`;
               console.log(`Attempting to fetch: ${url}`);
               const response = await fetch(url);
               
@@ -2165,7 +2165,7 @@ const MapController: React.FC<{
             // Fall back to loading the district data
             try {
               console.log('Falling back to district data for Gianyar');
-              const response = await fetch('/data/bali/gianyar/id5104_gianyar.geojson');
+              const response = await fetch('/data/id51_bali/id5104_gianyar/id5104_gianyar.geojson');
               
               if (!response.ok) throw new Error('District file not found');
               const text = await response.text();
@@ -2241,7 +2241,7 @@ const MapController: React.FC<{
           for (const kecamatan of kecamatanFiles) {
             try {
               console.log(`Loading kecamatan: ${kecamatan}`);
-              const url = `/data/bali/tabanan/${kecamatan}.geojson`;
+              const url = `/data/id51_bali/id5102_tabanan/${kecamatan}.geojson`;
               console.log(`Attempting to fetch: ${url}`);
               const response = await fetch(url);
               
@@ -2302,10 +2302,10 @@ const MapController: React.FC<{
           }
           
           // If no kecamatan files were loaded, fall back to BALI.geojson
-          console.log('No kecamatan files loaded for Tabanan, falling back to BALI.geojson');
-          const response = await fetch('/data/kabupaten_by_prov/BALI.geojson');
+          console.log('No kecamatan files loaded for Tabanan, falling back to district data');
+          const response = await fetch('/data/districts/kab_37.geojson');
           
-          if (!response.ok) throw new Error('BALI.geojson file not found');
+          if (!response.ok) throw new Error('District file not found');
           const responseText = await response.text();
           
           if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
@@ -2377,7 +2377,7 @@ const MapController: React.FC<{
           for (const kecamatan of kecamatanFiles) {
             try {
               console.log(`Loading kecamatan: ${kecamatan}`);
-              const url = `/data/bali/jembrana/${kecamatan}.geojson`;
+              const url = `/data/id51_bali/id5101_jembrana/${kecamatan}.geojson`;
               console.log(`Attempting to fetch: ${url}`);
               const response = await fetch(url);
               
@@ -2438,10 +2438,10 @@ const MapController: React.FC<{
           }
           
           // If no kecamatan files were loaded, fall back to BALI.geojson
-          console.log('No kecamatan files loaded for Jembrana, falling back to BALI.geojson');
-          const response = await fetch('/data/kabupaten_by_prov/BALI.geojson');
+          console.log('No kecamatan files loaded for Jembrana, falling back to district data');
+          const response = await fetch('/data/districts/kab_37.geojson');
           
-          if (!response.ok) throw new Error('BALI.geojson file not found');
+          if (!response.ok) throw new Error('District file not found');
           const responseText = await response.text();
           
           if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
@@ -2512,7 +2512,7 @@ const MapController: React.FC<{
           for (const kecamatan of kecamatanFiles) {
             try {
               console.log(`Loading kecamatan: ${kecamatan}`);
-              const url = `/data/bali/klungkung/${kecamatan}.geojson`;
+              const url = `/data/id51_bali/id5105_klungkung/${kecamatan}.geojson`;
               console.log(`Attempting to fetch: ${url}`);
               const response = await fetch(url);
               
@@ -2573,10 +2573,10 @@ const MapController: React.FC<{
           }
           
           // If no kecamatan files were loaded, fall back to BALI.geojson
-          console.log('No kecamatan files loaded for Klungkung, falling back to BALI.geojson');
-          const response = await fetch('/data/kabupaten_by_prov/BALI.geojson');
+          console.log('No kecamatan files loaded for Klungkung, falling back to district data');
+          const response = await fetch('/data/districts/kab_37.geojson');
           
-          if (!response.ok) throw new Error('BALI.geojson file not found');
+          if (!response.ok) throw new Error('District file not found');
           const responseText = await response.text();
           
           if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
@@ -2755,7 +2755,7 @@ const MapController: React.FC<{
           for (const kecamatan of kecamatanFiles) {
             try {
               console.log(`Loading kecamatan: ${kecamatan}`);
-              const url = `/data/bali/buleleng/${kecamatan}.geojson`;
+              const url = `/data/id51_bali/id5108_buleleng/${kecamatan}.geojson`;
               console.log(`Attempting to fetch: ${url}`);
               const response = await fetch(url);
               
@@ -2816,10 +2816,10 @@ const MapController: React.FC<{
           }
           
           // If no kecamatan files were loaded, fall back to BALI.geojson
-          console.log('No kecamatan files loaded for Buleleng, falling back to BALI.geojson');
-          const response = await fetch('/data/kabupaten_by_prov/BALI.geojson');
+          console.log('No kecamatan files loaded for Buleleng, falling back to district data');
+          const response = await fetch('/data/districts/kab_37.geojson');
           
-          if (!response.ok) throw new Error('BALI.geojson file not found');
+          if (!response.ok) throw new Error('District file not found');
           const responseText = await response.text();
           
           if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
@@ -2871,16 +2871,16 @@ const MapController: React.FC<{
           let response;
           let responseText;
           try {
-            // Try to load from kabupaten_by_prov/BALI.geojson for Bali districts
-            console.log('Attempting to fetch: /data/kabupaten_by_prov/BALI.geojson');
-            response = await fetch('/data/kabupaten_by_prov/BALI.geojson');
-            if (!response.ok) throw new Error('BALI.geojson file not found');
+            // Try to load from districts directory for Bali districts
+            console.log('Attempting to fetch: /data/districts/kab_37.geojson');
+            response = await fetch('/data/districts/kab_37.geojson');
+            if (!response.ok) throw new Error('District file not found');
             responseText = await response.text();
           } catch (e) {
             // Fall back to the district file
             console.log('Falling back to district data');
-            console.log('Attempting to fetch: /data/kab_37.geojson');
-            response = await fetch('/data/kab_37.geojson');
+            console.log('Attempting to fetch: /data/districts/kab_37.geojson');
+            response = await fetch('/data/districts/kab_37.geojson');
             if (!response.ok) throw new Error('Failed to fetch district data');
             responseText = await response.text();
           }
@@ -3469,7 +3469,7 @@ const App: React.FC = () => {
         let response;
         try {
           // Try the fixed file first
-          response = await fetch('/data/prov 37.geojson');
+          response = await fetch('/data/prov_37.geojson');
           if (!response.ok) throw new Error('Fixed file not found');
         } catch (e) {
           // Fall back to the simplified file
