@@ -113,21 +113,7 @@ Planned follow-up (no behavior change): introduce a tiny `fetchWithFallback(urls
 
 ## Data Submodule and Git LFS Workflow
 
-Large geospatial files under `public/data/` are managed in a separate Git repository added as a submodule and tracked with Git LFS.
-
-### Clone the repo with submodule and Git LFS
-
-```bash
-# Recommended: get submodule content on first clone
-git clone --recurse-submodules git@github.com:duwiarsana/percobaanmap.git
-cd percobaanmap
-
-# If you already cloned without submodules
-git submodule update --init --recursive
-
-# Install Git LFS (one-time per machine)
-git lfs install
-```
+If this project relies on large geospatial files under `public/data/`, those files are managed in a separate Git repository using Git submodules and Git LFS.
 
 ### Clone with submodule and LFS
 
@@ -138,48 +124,36 @@ git submodule update --init --recursive
 git lfs install
 ```
 
-### Submodule layout
-
-- Submodule path: `public/data/`
-- App repo branch: `master`
-- Data repo branch: `main`
-- Remote URLs use SSH. Ensure your SSH keys are set up.
-
-### Pull latest data
+### Update data
 
 ```bash
-# From the root of this repo
-git submodule update --remote --merge public/data
+# From project root
+git submodule update --remote --merge public/data || true
 
-# Or step into submodule and pull
+# Or within the submodule
 cd public/data
 git fetch
-git switch main
+git switch main || true
 git pull
+git lfs pull
 cd -
 ```
 
-### Make changes to data and push
+### Contribute data changes
 
 ```bash
-# Enter submodule
 cd public/data
-
-# Ensure new large files are tracked by LFS (examples)
 git lfs track "**/*.geojson"
-git lfs track "**/*.topojson"
 git add .gitattributes
-
-# Add data changes
 git add path/to/files
 git commit -m "Update geospatial data"
 git push origin main
 cd -
 
-# Record new submodule commit in the app repo
+# Record updated submodule commit in this repo
 git add public/data
 git commit -m "chore(data): bump data submodule"
-git push origin master
+git push
 ```
 
 ### Tips
@@ -188,13 +162,3 @@ git push origin master
 - After branch changes, run `git submodule update --init --recursive`.
 - Remotes may use SSH; ensure SSH keys are configured.
 
-### Notes and tips
-
-- After switching branches or pulling, run `git submodule update --init --recursive` to sync.
-- If LFS pointers appear as small text files, run `git lfs pull` inside `public/data`.
-- The data repo is safe to rewrite if migrating to LFS, but coordinate before force-pushing.
-- To change the submodule remote, edit `.gitmodules`, then run:
-  ```bash
-  git submodule sync --recursive
-  git submodule update --init --recursive
-  ```
