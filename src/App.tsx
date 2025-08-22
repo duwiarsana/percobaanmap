@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react';
+import React, { useState, useEffect, useRef, Dispatch, SetStateAction, useCallback, useMemo } from 'react';
 import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
 import L, { Map } from 'leaflet';
 import { loadSubdistrictData as loadSubdistrictDataGeneric, createEmptyGeoJSON, LoadResult } from './data-loader';
 import { findDistrictConfig } from './data-config';
+import { createDistrictStyle, subdistrictStyle } from './map/styles';
+import { createOnEachDistrict, createOnEachSubdistrict } from './map/handlers';
+import { setAppBridge, getAppBridge } from './appBridge';
 
 // Extend Window interface to include our app instance
 declare global {
@@ -56,12 +59,16 @@ const MapController: React.FC<{
   const [subdistrictData, setSubdistrictData] = useState<GeoJSONData | null>(null);
   const [selectedProvinceId, setSelectedProvinceId] = useState<string | number | null>(null);
   
-  // Make loadSubdistrictData accessible to the component instance
+  // Attach loadSubdistrictData into the appBridge for handlers to call
   useEffect(() => {
-    // Expose the loadSubdistrictData function to the App component
-    if (window.appInstance) {
-      window.appInstance.loadSubdistrictData = loadSubdistrictData;
-    }
+    const current = getAppBridge() || {};
+    setAppBridge({ ...current, loadSubdistrictData });
+    return () => {
+      const b = getAppBridge() || {};
+      // remove only loadSubdistrictData while keeping others
+      const { loadSubdistrictData: _omit, ...rest } = b as any;
+      setAppBridge(rest);
+    };
   }, []);
 
   // First, determine the province ID when a province is selected
@@ -123,32 +130,57 @@ const MapController: React.FC<{
         
         if (!isZooming) {
           try {
-            // Try to load the fixed district data with actual boundaries
-            let response;
-            try {
-              // Try the fixed file first
-              response = await fetch('/data/kab_37.geojson');
-              if (!response.ok) throw new Error('Fixed file not found');
-            } catch (e) {
-              // Fall back to the simplified file
-              console.log('Falling back to simplified district data');
-              response = await fetch('/data/kab_37.geojson');
-              if (!response.ok) throw new Error('Failed to fetch district data');
-            }
-            
+            // Choose dataset by province (Bali = 51)
+            const selProvDigits = selectedProvinceId?.toString().match(/\d+/)?.[0];
+            const districtUrl = selProvDigits === '51'
+              ? '/data/id51_bali/id51_bali_district.geojson'
+              : '/data/kab_37.geojson';
+
+            const response = await fetch(districtUrl);
+            if (!response.ok) throw new Error(`Failed to fetch district data from ${districtUrl}`);
+
             const data = await response.json();
             
             // Filter districts by province ID
-            const filteredData: GeoJSONData = {
+            const filteredDataRaw: GeoJSONData = {
               type: "FeatureCollection",
               features: data.features.filter((feature: any) => {
                 const provinceId = feature.properties.prov_id || 
                                   feature.properties.provinsi_id || 
                                   feature.properties.ID_PROV || 
-                                  feature.properties.PROVINSI;
-                return provinceId?.toString() === selectedProvinceId.toString(); // Use string comparison
+                                  feature.properties.PROVINSI ||
+                                  feature.properties.province_code; // e.g., 'id51'
+                const featProvDigits = provinceId?.toString().match(/\d+/)?.[0];
+                const selProvDigitsInner = selectedProvinceId?.toString().match(/\d+/)?.[0];
+                return featProvDigits && selProvDigitsInner && featProvDigits === selProvDigitsInner;
               })
             };
+
+            // For Bali, enrich each feature with a stable regency_code from DATA_CONFIG using district name
+            const filteredData: GeoJSONData = selProvDigits === '51'
+              ? {
+                  type: 'FeatureCollection',
+                  features: filteredDataRaw.features.map((feature: any) => {
+                    const name = feature.properties?.kab_name || feature.properties?.kabupaten || feature.properties?.KABUPATEN || feature.properties?.regency || feature.properties?.REGION || feature.properties?.nama || feature.properties?.NAMA || feature.properties?.name || feature.properties?.NAME || feature.properties?.Nama;
+                    let regencyCode = feature.properties?.regency_code;
+                    if (!regencyCode && name) {
+                      const cfg = findDistrictConfig(name);
+                      if (cfg?.id) regencyCode = cfg.id; // e.g., '5103'
+                    }
+                    if (regencyCode) {
+                      feature = {
+                        ...feature,
+                        properties: {
+                          ...feature.properties,
+                          regency_code: regencyCode,
+                          province_code: '51',
+                        }
+                      };
+                    }
+                    return feature;
+                  })
+                }
+              : filteredDataRaw;
             
             setDistrictData(filteredData);
             console.log(`Successfully loaded ${filteredData.features.length} district features for province ID: ${selectedProvinceId}`);
@@ -290,16 +322,32 @@ const MapController: React.FC<{
   // Load subdistrict data for any selected district - Refactored to use data-driven approach
   const loadSubdistrictData = async (districtId: string | number) => {
     if (!districtId) return Promise.resolve();
+  
+    // Prefer a stable 4-digit ID from config by selectedDistrict name
+    let preferredId: string | number | undefined;
+    try {
+      if (selectedDistrict) {
+        const cfgByName = findDistrictConfig(selectedDistrict);
+        if (cfgByName?.id) preferredId = cfgByName.id; // e.g., '5103'
+      }
+    } catch {}
+
+    // Fallback: normalize from the provided districtId
+    const fallbackNormalized: string | number = typeof districtId === 'number'
+      ? districtId
+      : (districtId.toString().match(/\d+/)?.join('') || districtId);
+
+    const normalizedId: string | number = preferredId ?? fallbackNormalized;
     
     try {
-      // Use the generic data loader
-      const result: LoadResult = await loadSubdistrictDataGeneric(districtId);
+      // Use the generic data loader with normalized ID
+      const result: LoadResult = await loadSubdistrictDataGeneric(normalizedId);
 
       if (result.success && result.data) {
         setSubdistrictData(result.data);
 
         // Log success with meaningful information
-        const districtConfig = findDistrictConfig(districtId);
+        const districtConfig = findDistrictConfig(normalizedId);
         const districtName = districtConfig?.name || 'Unknown';
 
         if (result.loadedCount && result.loadedCount > 0) {
@@ -324,90 +372,11 @@ const MapController: React.FC<{
     }
   };
 
-  // Style for districts (kabupaten)
-  const styleDistrict = (feature: any) => {
-    const props = feature.properties;
-    const districtName = props.kab_name || props.kabupaten || props.KABUPATEN || props.nama || props.NAMA || props.name || props.NAME || props.Nama;
-    const isSelected = selectedDistrict === districtName;
-    return {
-      fillColor: isSelected ? '#f5a623' : '#4a90e2',
-      weight: 1.5,
-      opacity: 1,
-      color: 'white',
-      fillOpacity: isSelected ? 0.8 : 0.6,
-    };
-  };
-
-  // Event handler for districts (kabupaten)
-  const onEachDistrict = (feature: any, layer: any) => {
-    const props = feature.properties;
-    const districtName = props.kab_name || props.kabupaten || props.KABUPATEN || props.nama || props.NAMA || props.name || props.NAME || props.Nama;
-    let districtId = props.id_kabupaten || props.ID || props.KODE || props.kab_id || props.kabupaten_id || props.id || props.gid || props.uuid || props.code || props.regency_code;
-
-    if (districtName) {
-      layer.bindTooltip(districtName, { sticky: true, className: 'custom-tooltip' });
-      layer.on({
-        click: (e: any) => {
-          if (window.appInstance) {
-            window.appInstance.setIsZooming(true);
-            window.appInstance.setSelectedDistrict(districtName);
-            window.appInstance.setSelectedDistrictId(districtId);
-            const map = e.target._map;
-            if (map) {
-              const bounds = e.target.getBounds();
-              map.flyToBounds(bounds, { padding: [50, 50], maxZoom: 11, duration: 0.8 });
-              setTimeout(() => {
-                window.appInstance.setIsZooming(false);
-              }, 900);
-            }
-          }
-        },
-        mouseover: (e: any) => e.target.setStyle({ weight: 3, fillOpacity: 0.9 }),
-        mouseout: (e: any) => e.target.setStyle(styleDistrict(feature)),
-      });
-    }
-  };
-
-  // Style for subdistricts (kecamatan)
-  const styleSubdistrict = (feature: any) => {
-    const props = feature.properties;
-    const kecamatanName = props.kec_name || props.kecamatan || props.KECAMATAN || props.NAMA || props.nama || props.district || props.name || props.NAME;
-    let hash = 0;
-    if (kecamatanName) {
-      for (let i = 0; i < kecamatanName.length; i++) {
-        hash = ((hash << 5) - hash) + kecamatanName.charCodeAt(i);
-        hash |= 0;
-      }
-    }
-    const colors = ['#FF5733', '#33FF57', '#3357FF', '#F033FF', '#FF33A8', '#33FFF0', '#F3FF33', '#FF9933'];
-    return {
-      weight: 2,
-      opacity: 1.0,
-      color: '#000000',
-      fillColor: colors[Math.abs(hash) % colors.length],
-      fillOpacity: 0.7,
-    };
-  };
-
-  // Event handler for subdistricts (kecamatan)
-  const onEachSubdistrict = (feature: any, layer: any) => {
-    const props = feature.properties;
-    const kecamatanName = props.kec_name || props.kecamatan || props.KECAMATAN || props.NAMA || props.nama || props.district || props.name || props.NAME || props.village;
-    if (kecamatanName) {
-      layer.bindTooltip(kecamatanName, { sticky: true, className: 'custom-tooltip kecamatan-tooltip' });
-      layer.on({
-        click: (e: any) => {
-          const map = e.target._map;
-          if (map) {
-            const bounds = e.target.getBounds();
-            map.flyToBounds(bounds, { padding: [50, 50], maxZoom: 13, duration: 0.5 });
-          }
-        },
-        mouseover: (e: any) => e.target.setStyle({ weight: 4, color: '#FFFFFF', fillOpacity: 0.9 }),
-        mouseout: (e: any) => e.target.setStyle(styleSubdistrict(feature)),
-      });
-    }
-  };
+  // Use extracted style/handler factories to keep logic identical and improve structure
+  const styleDistrict = useMemo(() => createDistrictStyle(selectedDistrict), [selectedDistrict]);
+  const styleSubdistrict = useCallback(subdistrictStyle, []);
+  const onEachDistrict = useMemo(() => createOnEachDistrict(styleDistrict), [styleDistrict]);
+  const onEachSubdistrict = useMemo(() => createOnEachSubdistrict(styleSubdistrict), [styleSubdistrict]);
 
   return (
     <>
@@ -421,7 +390,7 @@ const MapController: React.FC<{
       )}
       {selectedDistrict && subdistrictData && (
         <GeoJSON
-          key={`subdistricts-${selectedDistrict}`}
+          key={`subdistricts-${selectedDistrictId}`}
           data={subdistrictData}
           style={styleSubdistrict}
           onEachFeature={onEachSubdistrict}
@@ -439,25 +408,18 @@ const App: React.FC = () => {
   const [selectedDistrictId, setSelectedDistrictId] = useState<string | number | null>(null);
   const [isZooming, setIsZooming] = useState<boolean>(false);
   
-  // Store reference to state setters in window object for access from event handlers
+  // Expose state setters through appBridge for handlers to access
   useEffect(() => {
-    window.appInstance = {
-      setSelectedProvince,
-      setSelectedDistrict,
-      setSelectedDistrictId,
-      setIsZooming,
-      loadSubdistrictData: (districtId: string | number) => {
-        // Find the MapController component and call its loadSubdistrictData method
-        if (districtId) {
-          console.log(`App requesting to load subdistrict data for district ID: ${districtId}`);
-        }
-      }
-    };
-    
+    setAppBridge({
+      setIsZooming: (value: boolean) => setIsZooming(value),
+      setSelectedDistrict: (value: string | null) => setSelectedDistrict(value),
+      setSelectedDistrictId: (value: string | number | null) => setSelectedDistrictId(value),
+    });
     return () => {
-      window.appInstance = undefined;
+      // Clear the bridge on unmount
+      setAppBridge({});
     };
-  }, []);
+  }, [setIsZooming, setSelectedDistrict, setSelectedDistrictId]);
 
   // Handle breadcrumb navigation clicks
   const handleBreadcrumbClick = (level: string) => {
@@ -566,19 +528,9 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Try to load the fixed province data with actual boundaries
-        let response;
-        try {
-          // Try the fixed file first
-          response = await fetch('/data/prov_37.geojson');
-          if (!response.ok) throw new Error('Fixed file not found');
-        } catch (e) {
-          // Fall back to the simplified file
-          console.log('Falling back to simplified province data');
-          response = await fetch('/data/prov_37.geojson');
-          if (!response.ok) throw new Error('Failed to fetch province data');
-        }
-        
+        const response = await fetch('/data/prov_37.geojson');
+        if (!response.ok) throw new Error('Failed to fetch province data');
+
         const data = await response.json();
         setGeoJsonData(data);
         console.log('Successfully loaded province data');
@@ -591,8 +543,25 @@ const App: React.FC = () => {
         console.error("Error loading data:", error);
       }
     };
+    
     fetchData();
   }, []);
+
+  // Memoize the selected province FeatureCollection to avoid recomputation on rerenders
+  const selectedProvinceCollection = useMemo(() => {
+    if (!geoJsonData || !selectedProvince) return null;
+    return {
+      type: "FeatureCollection",
+      features: geoJsonData.features.filter((feature: GeoJSONFeature) => {
+        const name = feature.properties.prov_name || 
+                    feature.properties.Propinsi || 
+                    feature.properties.PROVINSI || 
+                    feature.properties.provinsi || 
+                    feature.properties.NAMA;
+        return name === selectedProvince;
+      })
+    } as GeoJSONData;
+  }, [geoJsonData, selectedProvince]);
 
   return (
     <div className="App">
@@ -675,19 +644,9 @@ const App: React.FC = () => {
         )}
         
         {/* Render only the selected province when one is clicked */}
-        {geoJsonData && selectedProvince && (
+        {selectedProvinceCollection && (
           <GeoJSON 
-            data={{
-              type: "FeatureCollection",
-              features: geoJsonData.features.filter((feature: GeoJSONFeature) => {
-                const name = feature.properties.prov_name || 
-                            feature.properties.Propinsi || 
-                            feature.properties.PROVINSI || 
-                            feature.properties.provinsi || 
-                            feature.properties.NAMA;
-                return name === selectedProvince;
-              })
-            } as GeoJSONData} 
+            data={selectedProvinceCollection}
             style={(feature) => ({
               fillColor: '#3388ff',
               weight: 2,
@@ -699,7 +658,7 @@ const App: React.FC = () => {
               // Only add tooltip, no click handler needed since we're already focused on this province
               const provinceName = feature.properties.prov_name || feature.properties.Propinsi || 
                                  feature.properties.PROVINSI || feature.properties.provinsi || 
-                                 feature.properties.NAMA;
+                                  feature.properties.NAMA;
               if (provinceName) {
                 layer.bindTooltip(provinceName, {
                   sticky: true,
