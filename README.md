@@ -111,6 +111,39 @@ Refactored functions now using the helpers (logic, logging order, and fallbacks 
 Planned follow-up (no behavior change): introduce a tiny `fetchWithFallback(urls: string[])` to centralize multi-URL attempts while preserving log order and messages.
 
 
+## Map Data Loading Mechanism
+
+This section documents how the React map loads and renders boundaries at each level and how Bali is handled robustly.
+
+- __Province → ID resolution__ (`src/App.tsx`)
+  - When `selectedProvince` changes, we immediately clear any district context with `setSelectedDistrict(null)`, `setSelectedDistrictId(null)`, and `setSubdistrictData(null)` to ensure only districts render next.
+  - We fetch `/data/prov_37.geojson` and find the selected province feature, reading `prov_id`/`provinsi_id`/`ID`/`KODE` as the province identifier.
+
+- __Load districts for selected province__ (`MapController.fetchDistrictData` in `src/App.tsx`)
+  - Always fetch the unified districts file: `/data/kab_37.geojson`.
+  - For non-Bali provinces, filter by province fields present per feature: `prov_id`, `provinsi_id`, `ID_PROV`, `PROVINSI`, or `province_code`.
+  - __Bali special handling (province 51)__:
+    - Some datasets lack consistent province fields. We therefore derive membership by inspecting each feature's __4‑digit regency code__ using `getDistrictId(props)` from `src/utils/geojsonProps.ts`.
+    - Keep features whose regency code starts with `51`. If a code is absent, we fall back to district name lookup via `findDistrictConfig(name)` from `src/data-config.ts`.
+    - We enrich Bali district features with `regency_code` and `province_code: '51'` to stabilize downstream logic.
+
+- __ID normalization__ (`src/utils/geojsonProps.ts`)
+  - `getDistrictId(props)` extracts a stable 4‑digit regency code by preferring `regency_code` or deriving it from `district_code`/`village_code`.
+  - It ignores UUID-like and short or malformed values to avoid mismatches like `01`, `24`, `844`, or random `gid` values.
+
+- __District click → subdistrict load__ (`src/map/handlers.ts`, `src/App.tsx`)
+  - The district click handler binds tooltips and, on click, resolves a preferred 4‑digit ID using `findDistrictConfig(districtName)`; falls back to `getDistrictId(props)`.
+  - It only calls `setSelectedDistrictId(id)` if the normalized ID matches `/^\d{4}$/`, preventing bad subdistrict loads.
+  - In `src/App.tsx`, subdistrict loading prefers the config-based ID from `selectedDistrict` name; otherwise, it normalizes the provided ID and calls the generic loader.
+  - Rendering of subdistricts is gated by truthy `selectedDistrict` and `subdistrictData` to ensure province views only show districts.
+
+- __Data paths__
+  - Provinces: `/data/prov_37.geojson`
+  - Districts (all provinces): `/data/kab_37.geojson`
+  - Bali subdistricts: `/data/id51_bali/id{district_id}_<district_name>/*.geojson` (confirmed folder structure), loaded by the generic loader using the 4‑digit regency code.
+
+This mechanism ensures Bali behaves like other provinces at province level (only districts shown) while still loading subdistricts correctly on district selection.
+
 ## Data Submodule and Git LFS Workflow
 
 If this project relies on large geospatial files under `public/data/`, those files are managed in a separate Git repository using Git submodules and Git LFS.
