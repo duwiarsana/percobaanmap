@@ -1,0 +1,6 @@
+# Git LFS tracking for large geospatial/data assets
+*.geojson filter=lfs diff=lfs merge=lfs -text
+*.topojson filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.mbtiles filter=lfs diff=lfs merge=lfs -text
+*.gpkg filter=lfs diff=lfs merge=lfs -text
