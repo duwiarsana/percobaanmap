@@ -190,35 +190,45 @@ Recommended workflow when updating East Java data:
 2. Run `python3 scripts/gen_prov35_config.py`
 3. Start the app and click a district to verify subdistrict loads; check console/network if anything fails
 
-## How to add a new province (checklist)
+## How to add a new province (systematic workflow)
 
-- **Prepare data under `public/data/`**
-  - Create a province folder like `id<prov>_<slug>/` (e.g., `id51_bali/`, `id35_jawa_timur/`).
-  - Inside it, add district folders `id<prov><regency>_<district-slug>/` with subdistrict `.geojson` files.
-  - Optional: add a combined district fallback file named like the district folder plus `.geojson` (e.g., `id3510_banyuwangi.geojson`).
+- **Understand the source layout** (e.g., `indonesia-district-master 3/`)
+  - Root contains shared aggregates: `prov 34.geojson`, `prov 37.geojson`, `kab 34.geojson`, `kab 37.geojson`, and simplified variants.
+  - Province folders exist as placeholders: `id<prov>_<slug>/` (often empty in the raw source; you will populate target layout yourself).
+
+- **Target layout under `public/data/`** (what the app expects)
+  - Aggregates at root: `prov_<prov>.geojson`, `kab_<prov>.geojson` (and optionally `prov_<prov>_simplified.geojson`).
+  - Per-province directory: `id<prov>_<slug>/` (e.g., `id51_bali/`, `id35_jawa_timur/`).
+  - Inside each province directory, per-district folders: `id<prov><regency>_<district-slug>/`.
+  - Inside each district folder: subdistrict `.geojson` files named like `id<7+digits>_<kecamatan-slug>.geojson` and an optional combined fallback `<district-folder>.geojson`.
+
+- **Populate the target layout**
+  1. Copy or export province/district aggregate files into `public/data/` and rename to `prov_<prov>.geojson`, `kab_<prov>.geojson` (e.g., `prov 37.geojson` → `prov_37.geojson`).
+  2. Create `public/data/id<prov>_<slug>/` and within it `id<prov><regency>_<district-slug>/` directories.
+  3. Place each kecamatan GeoJSON into the corresponding district folder. If available, add the combined fallback `<district>.geojson` file.
 
 - **Create a province config module**
-  - Add `src/data/prov-<prov>-<slug>.ts` exporting a `ProvinceConfig` with:
-    - `id` (e.g., `'35'`), `name`, `path` (e.g., `/data/id35_jawa_timur`)
-    - `districtsFile`: path to the province’s districts collection (e.g., `/data/jawa_timu_kab.geojson` or `/data/kab_37.geojson`)
-    - `districts`: map of 4-digit codes → `{ id, name, path, subdistricts, fallbackFile? }`
+  - Add `src/data/prov-<prov>-<slug>.ts` exporting a `ProvinceConfig`:
+    - `id` (e.g., `'35'`), `name`, `path` (e.g., `/data/id35_jawa_timur`).
+    - `districtsFile`: URL to the province’s districts collection: either a province-specific file (e.g., `/data/jawa_timu_kab.geojson`) or the shared file (e.g., `/data/kab_37.geojson`).
+    - `districts`: map of 4-digit regency/city codes → `{ id, name, path, subdistricts, fallbackFile? }` where `subdistricts` are basenames without `.geojson`.
+
+- **Automate (recommended)**
+  - Use or adapt `scripts/gen_prov35_config.py` to scan `public/data/id<prov>_<slug>/` and generate the province module with accurate `path`, `subdistricts`, and `fallbackFile` entries.
 
 - **Wire the province into the registry**
-  - Update `src/data/provinces.ts` to import the module and include it in the `DATA_CONFIG` map.
+  - Update `src/data/provinces.ts` to import and include the new province module in `DATA_CONFIG`.
 
 - **Validate in the app**
-  - Start the app, select the province, ensure districts render from `districtsFile`.
-  - Click a district; confirm subdistricts load from the configured `path` and `subdistricts`, or fallback file.
-  - Check browser console/network for any 404s or parsing errors.
+  - Start the app. Select the province and confirm districts render from `districtsFile`.
+  - Click a district. Ensure subdistricts load from `path/subdistrict.id.geojson` or the `fallbackFile` if individuals are missing.
+  - Check browser console/network for any 404s or JSON parse errors.
 
-- **Optional helpers**
-  - If you have district folders ready, consider writing a small generator like `scripts/gen_prov35_config.py` to auto-build the province config.
-
-Notes:
-- Ensure district names in the config closely match the names in the districts GeoJSON for reliable `findDistrictConfig()` matches.
-- Keep subdistrict entries as basenames without `.geojson`; the loader appends the extension.
-- Province 51 (Bali) uses `/data/id51_bali/...`; Province 35 (East Java) uses `/data/id35_jawa_timur/...`.
-- A unified districts file like `/data/kab_37.geojson` can be reused across provinces if it includes all districts.
+Notes and conventions:
+- Keep subdistrict entries as basenames (no `.geojson`); the loader appends the extension.
+- District names in the config should match display names in the districts GeoJSON; otherwise, add `alternativeIds` or ensure IDs are used for matching.
+- Province 51 (Bali): `/data/id51_bali/...`; Province 35 (East Java): `/data/id35_jawa_timur/...`.
+- A shared `kab_<prov>.geojson` can be reused across provinces if it contains all districts; otherwise, provide a province-specific `districtsFile`.
 
 ## Data Submodule and Git LFS Workflow
 
