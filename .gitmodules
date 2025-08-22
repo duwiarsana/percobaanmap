@@ -1,0 +1,4 @@
+[submodule "indonesia-map-viewer"]
+	path = indonesia-map-viewer
+	url = git@github.com:duwiarsana/percobaanmap.git
+	ignore = untracked
