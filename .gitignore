@@ -50,9 +50,13 @@ prov 37.geojson
 kab\ 37.geojson
 prov\ 37.geojson
 
-# App-specific large assets to exclude from VCS (subproject paths)
+# --- Project-specific large data and temp assets ---
+# prevent accidental commits of bulk GeoJSON datasets and archives
+/geojsonKecamatan/
+/optimized_geojson/
+/id51_bali/
+public/data/PercobaanMap.zip
 indonesia-map-viewer/public/kec.geojson
-indonesia-map-viewer/build/kec.geojson
 indonesia-map-viewer/build/
 
 # Project-specific archives
