@@ -110,3 +110,55 @@ Refactored functions now using the helpers (logic, logging order, and fallbacks 
 
 Planned follow-up (no behavior change): introduce a tiny `fetchWithFallback(urls: string[])` to centralize multi-URL attempts while preserving log order and messages.
 
+
+## Data Submodule and Git LFS Workflow
+
+If this project relies on large geospatial files under `public/data/`, those files are managed in a separate Git repository using Git submodules and Git LFS.
+
+### Clone with submodule and LFS
+
+```bash
+git clone --recurse-submodules <this-repo-url>
+cd indonesia-map-viewer
+git submodule update --init --recursive
+git lfs install
+```
+
+### Update data
+
+```bash
+# From project root
+git submodule update --remote --merge public/data || true
+
+# Or within the submodule
+cd public/data
+git fetch
+git switch main || true
+git pull
+git lfs pull
+cd -
+```
+
+### Contribute data changes
+
+```bash
+cd public/data
+git lfs track "**/*.geojson"
+git add .gitattributes
+git add path/to/files
+git commit -m "Update geospatial data"
+git push origin main
+cd -
+
+# Record updated submodule commit in this repo
+git add public/data
+git commit -m "chore(data): bump data submodule"
+git push
+```
+
+### Tips
+
+- If you see tiny text files instead of GeoJSON, run `git lfs pull` inside `public/data`.
+- After branch changes, run `git submodule update --init --recursive`.
+- Remotes may use SSH; ensure SSH keys are configured.
+
