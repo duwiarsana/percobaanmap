@@ -126,6 +126,7 @@ This section documents how the React map loads and renders boundaries at each le
     - Some datasets lack consistent province fields. We therefore derive membership by inspecting each feature's __4‑digit regency code__ using `getDistrictId(props)` from `src/utils/geojsonProps.ts`.
     - Keep features whose regency code starts with `51`. If a code is absent, we fall back to district name lookup via `findDistrictConfig(name)` from `src/data-config.ts`.
     - We enrich Bali district features with `regency_code` and `province_code: '51'` to stabilize downstream logic.
+    - Name matching is normalized (case-insensitive, spaces/underscores/hyphens removed) so variants like `KARANG ASEM` match `Karangasem`. This prevents valid districts from being filtered out due to formatting differences.
 
 - __ID normalization__ (`src/utils/geojsonProps.ts`)
   - `getDistrictId(props)` extracts a stable 4‑digit regency code by preferring `regency_code` or deriving it from `district_code`/`village_code`.
@@ -216,3 +217,8 @@ Behavior-preserving fixes and refactors to stabilize Bali subdistrict loading an
   - Maintains per-district Bali paths under `public/data/id51_bali/id510x_<district>/...` with fallbacks to `/data/districts/kab_37.geojson` where appropriate.
 
 These changes fix cases where IDs like `01`, `24`, or feature `gid`/`uuid` values caused subdistricts not to load.
+
+### 2025-08-22 (later)
+
+- __District name normalization for Bali filtering__
+  - Improved `findDistrictConfig()` in `src/data-config.ts` to normalize names by lowercasing, removing spaces/underscores/hyphens, and stripping diacritics. This resolves rendering gaps where districts like "KARANG ASEM" (Karangasem, 5107) were present in `/data/kab_37.geojson` but accidentally excluded during filtering.

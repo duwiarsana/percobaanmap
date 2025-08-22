@@ -217,6 +217,14 @@ export const DATA_CONFIG: Record<string, ProvinceConfig> = {
 // Helper functions for district lookup
 export function findDistrictConfig(districtId: string | number): DistrictConfig | null {
   const idStr = districtId.toString();
+
+  const normalize = (s: string) => s
+    .toLowerCase()
+    .replace(/[_\-\s]+/g, '') // remove spaces/underscores/hyphens
+    .normalize('NFKD')
+    .replace(/[^a-z0-9]/g, '');
+
+  const normQuery = normalize(idStr);
   
   // Search through all provinces and districts
   for (const province of Object.values(DATA_CONFIG)) {
@@ -236,15 +244,13 @@ export function findDistrictConfig(districtId: string | number): DistrictConfig 
         return district;
       }
       
-      // Check name match (case insensitive)
-      if (typeof districtId === 'string' && 
-          district.name.toLowerCase() === districtId.toLowerCase()) {
+      // Name-based checks
+      const normName = normalize(district.name);
+      if (normName && normName === normQuery) {
         return district;
       }
-      
-      // Check partial name match (case insensitive)
-      if (typeof districtId === 'string' && 
-          districtId.toLowerCase().includes(district.name.toLowerCase())) {
+      // Partial in either direction
+      if (normName && (normQuery.includes(normName) || normName.includes(normQuery))) {
         return district;
       }
     }
