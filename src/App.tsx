@@ -29,7 +29,7 @@ interface GeoJSONData {
   features: GeoJSONFeature[];
 }
 
-// ----- Shared helpers (behavior-preserving) -----
+// ----- Shared helpers (referenced by multiple loaders) -----
 // Safely parse a Response as JSON with HTML guard, preserving existing error semantics
 async function parseJsonSafely(response: Response, context: string): Promise<any> {
   const text = await response.text();
@@ -81,16 +81,9 @@ function enhanceKecamatanFeatures(features: any[], kecamatanId: string, district
   });
 }
 
-// MapController Props
-// This interface is used for the MapController component
-// Interface for MapController component props (currently unused but kept for future use)
-interface MapControllerProps {
-  map: L.Map;
-  selectedProvince: string | null;
-  selectedDistrict: string | null;
-  onProvinceSelect: (province: string | null) => void;
-  onDistrictSelect: (district: string | null) => void;
-}
+
+
+
 
 const MapController: React.FC<{
   selectedProvince: string | null;
@@ -125,6 +118,7 @@ const MapController: React.FC<{
     if (window.appInstance) {
       window.appInstance.loadSubdistrictData = loadSubdistrictData;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // First, determine the province ID when a province is selected
@@ -3331,8 +3325,6 @@ const MapController: React.FC<{
 const App: React.FC = () => {
   const mapRef = useRef<Map | null>(null);
   const [geoJsonData, setGeoJsonData] = useState<GeoJSONData | null>(null);
-  const [districtData, setDistrictData] = useState<GeoJSONData | null>(null);
-  const [subdistrictData, setSubdistrictData] = useState<GeoJSONData | null>(null);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedDistrictId, setSelectedDistrictId] = useState<string | number | null>(null);

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Indonesia - Batas Provinsi</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+        .legend {
+            line-height: 18px;
+            color: #555;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        // Initialize the map centered on Indonesia
+        const map = L.map('map').setView([-2.5, 118], 5);
+
+        // Add OpenStreetMap base layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Function to get color based on province ID
+        function getColor(id) {
+            // Create a color palette for provinces
+            const colors = [
+                '#66c2a5', '#fc8d62', '#8da0cb', '#e78ac3', '#a6d854', 
+                '#ffd92f', '#e5c494', '#b3b3b3', '#8dd3c7', '#bebada', 
+                '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', 
+                '#d9d9d9', '#bc80bd', '#ccebc5', '#ffed6f', '#ffffb3',
+                '#1f78b4', '#33a02c', '#e31a1c', '#ff7f00', '#6a3d9a',
+                '#b15928', '#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f',
+                '#cab2d6', '#ffff99', '#b15928', '#a6cee3', '#b2df8a'
+            ];
+            
+            // Use modulo to cycle through colors if there are more provinces than colors
+            return colors[id % colors.length];
+        }
+
+        // Control that shows province info on hover
+        let info = L.control();
+
+        info.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+
+        info.update = function (props) {
+            this._div.innerHTML = '<h4>Provinsi Indonesia</h4>' +  
+                (props ? '<b>' + props.Propinsi + '</b>' : 'Arahkan kursor ke provinsi');
+        };
+
+        info.addTo(map);
+
+        // Load GeoJSON data
+        fetch('prov 37.geojson')
+            .then(response => response.json())
+            .then(data => {
+                // Add GeoJSON layer
+                L.geoJSON(data, {
+                    style: function(feature) {
+                        return {
+                            weight: 2,
+                            opacity: 1,
+                            color: 'white',
+                            dashArray: '3',
+                            fillOpacity: 0.7,
+                            fillColor: getColor(feature.properties.ID)
+                        };
+                    },
+                    onEachFeature: function(feature, layer) {
+                        layer.on({
+                            mouseover: function(e) {
+                                const layer = e.target;
+                                layer.setStyle({
+                                    weight: 3,
+                                    color: '#666',
+                                    dashArray: '',
+                                    fillOpacity: 0.9
+                                });
+                                layer.bringToFront();
+                                info.update(feature.properties);
+                            },
+                            mouseout: function(e) {
+                                const layer = e.target;
+                                layer.setStyle({
+                                    weight: 2,
+                                    color: 'white',
+                                    dashArray: '3',
+                                    fillOpacity: 0.7
+                                });
+                                info.update();
+                            },
+                            click: function(e) {
+                                map.fitBounds(e.target.getBounds());
+                            }
+                        });
+                        
+                        // Add tooltip with province name
+                        if (feature.properties && feature.properties.Propinsi) {
+                            layer.bindTooltip(feature.properties.Propinsi, {
+                                permanent: false,
+                                direction: 'center',
+                                className: 'province-tooltip'
+                            });
+                        }
+                    }
+                }).addTo(map);
+            })
+            .catch(error => {
+                console.error('Error loading GeoJSON:', error);
+                alert('Gagal memuat data GeoJSON. Silakan periksa konsol untuk detail.');
+            });
+
+        // Add legend
+        const legend = L.control({position: 'bottomright'});
+
+        legend.onAdd = function (map) {
+            const div = L.DomUtil.create('div', 'info legend');
+            div.innerHTML = '<h4>Peta Provinsi Indonesia</h4>' +
+                            '<p>Klik pada provinsi untuk memperbesar</p>';
+            return div;
+        };
+
+        legend.addTo(map);
+    </script>
+</body>
+</html>
