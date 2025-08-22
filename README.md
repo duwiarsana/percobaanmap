@@ -190,6 +190,36 @@ Recommended workflow when updating East Java data:
 2. Run `python3 scripts/gen_prov35_config.py`
 3. Start the app and click a district to verify subdistrict loads; check console/network if anything fails
 
+## How to add a new province (checklist)
+
+- **Prepare data under `public/data/`**
+  - Create a province folder like `id<prov>_<slug>/` (e.g., `id51_bali/`, `id35_jawa_timur/`).
+  - Inside it, add district folders `id<prov><regency>_<district-slug>/` with subdistrict `.geojson` files.
+  - Optional: add a combined district fallback file named like the district folder plus `.geojson` (e.g., `id3510_banyuwangi.geojson`).
+
+- **Create a province config module**
+  - Add `src/data/prov-<prov>-<slug>.ts` exporting a `ProvinceConfig` with:
+    - `id` (e.g., `'35'`), `name`, `path` (e.g., `/data/id35_jawa_timur`)
+    - `districtsFile`: path to the province’s districts collection (e.g., `/data/jawa_timu_kab.geojson` or `/data/kab_37.geojson`)
+    - `districts`: map of 4-digit codes → `{ id, name, path, subdistricts, fallbackFile? }`
+
+- **Wire the province into the registry**
+  - Update `src/data/provinces.ts` to import the module and include it in the `DATA_CONFIG` map.
+
+- **Validate in the app**
+  - Start the app, select the province, ensure districts render from `districtsFile`.
+  - Click a district; confirm subdistricts load from the configured `path` and `subdistricts`, or fallback file.
+  - Check browser console/network for any 404s or parsing errors.
+
+- **Optional helpers**
+  - If you have district folders ready, consider writing a small generator like `scripts/gen_prov35_config.py` to auto-build the province config.
+
+Notes:
+- Ensure district names in the config closely match the names in the districts GeoJSON for reliable `findDistrictConfig()` matches.
+- Keep subdistrict entries as basenames without `.geojson`; the loader appends the extension.
+- Province 51 (Bali) uses `/data/id51_bali/...`; Province 35 (East Java) uses `/data/id35_jawa_timur/...`.
+- A unified districts file like `/data/kab_37.geojson` can be reused across provinces if it includes all districts.
+
 ## Data Submodule and Git LFS Workflow
 
 If this project relies on large geospatial files under `public/data/`, those files are managed in a separate Git repository using Git submodules and Git LFS.
