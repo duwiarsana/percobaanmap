@@ -2,16 +2,12 @@
 // Structured approach using province-specific metadata files
 
 import type { DistrictConfig, ProvinceConfig } from './types/data-config';
-import PROV_51 from './data/prov-51-bali';
-import PROV_35 from './data/prov-35-jawa-timur';
+import PROVINCES from './data/provinces';
 
 export type { SubdistrictFile, DistrictConfig, ProvinceConfig } from './types/data-config';
 
 // Main data configuration (assembled from per-province modules)
-export const DATA_CONFIG: Record<string, ProvinceConfig> = {
-  '51': PROV_51,
-  '35': PROV_35,
-};
+export const DATA_CONFIG: Record<string, ProvinceConfig> = PROVINCES;
 
 // Helper functions for district lookup
 export function findDistrictConfig(districtId: string | number): DistrictConfig | null {
