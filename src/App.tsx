@@ -6,6 +6,7 @@ import L, { Map } from 'leaflet';
 import { loadSubdistrictData as loadSubdistrictDataGeneric, createEmptyGeoJSON, LoadResult } from './data-loader';
 import { findDistrictConfig } from './data-config';
 import { createDistrictStyle, subdistrictStyle } from './map/styles';
+import { getDistrictId } from './utils/geojsonProps';
 import { createOnEachDistrict, createOnEachSubdistrict } from './map/handlers';
 import { setAppBridge, getAppBridge } from './appBridge';
 
@@ -210,43 +211,18 @@ const MapController: React.FC<{
       // Update ref to prevent re-filtering for the same ID
       filteredForDistrictRef.current = selectedDistrictId;
       
-      // Filter to only show the selected district by ID
+      // Filter to only show the selected district by ID (normalize with same logic as handlers)
       const filteredData: GeoJSONData = {
         type: "FeatureCollection",
         features: districtData.features.filter((feature: any) => {
           const props = feature.properties;
-          
-          // Get district ID from various possible property names - match the same logic as click handler
-          let districtId = props.id_kabupaten || 
-                           props.ID || 
-                           props.KODE || 
-                           props.kab_id || 
-                           props.kabupaten_id ||
-                           props.id || 
-                           props.gid || 
-                           props.uuid || 
-                           props.code ||
-                           props.regency_code;
-          
-          // Get district name from various possible property names
-          const districtName = props.kab_name || 
-                            props.kabupaten || 
-                            props.KABUPATEN || 
-                            props.nama || 
-                            props.NAMA || 
-                            props.name || 
-                            props.NAME || 
-                            props.Nama;
-                            
-          // Special case for Karangasem
-          if (districtName && districtName.toLowerCase().includes('karangasem') && props.regency_code === "id5107") {
-            districtId = "5107";
-          }
-          
-          const isSelected = districtId && districtId.toString() === selectedDistrictId.toString();
+          // Normalize to 4-digit regency code
+          const extracted = getDistrictId(props);
+          const normId = typeof extracted === 'number' ? extracted.toString() : (extracted?.toString().match(/\d+/)?.join('') || '');
+          const isSelected = !!normId && normId === selectedDistrictId.toString();
           
           if (isSelected) {
-            console.log(`Found matching district for ID ${selectedDistrictId}: ${districtName}`);
+            console.log(`Found matching district for ID ${selectedDistrictId}`);
           }
           
           return isSelected;

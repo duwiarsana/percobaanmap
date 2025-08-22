@@ -22,11 +22,12 @@ export const createOnEachDistrict = (
             const cfg = findDistrictConfig(districtName);
             const preferredId = cfg?.id ?? districtId;
             // Normalize ID like 'id5103_badung' or 'id5103' -> '5103'
-            const normId = typeof preferredId === 'number' ? preferredId : (preferredId?.toString().match(/\d+/)?.join('') || preferredId);
+            const normIdStr = typeof preferredId === 'number' ? preferredId.toString() : (preferredId?.toString().match(/\d+/)?.join('') || '');
+            const isValid4 = /^\d{4}$/.test(normIdStr);
             // Debug: show which props were used to derive ID
             try {
               const keys = Object.keys(props || {});
-              console.log('[DistrictClick] name=', districtName, 'rawId=', districtId, 'cfgId=', cfg?.id, 'normId=', normId, 'keys=', keys);
+              console.log('[DistrictClick] name=', districtName, 'rawId=', districtId, 'cfgId=', cfg?.id, 'normId=', normIdStr, 'isValid4=', isValid4, 'keys=', keys);
               console.log('[DistrictClick] sample codes:', {
                 regency_code: (props as any)?.regency_code,
                 district_code: (props as any)?.district_code,
@@ -38,9 +39,13 @@ export const createOnEachDistrict = (
                 id: (props as any)?.id,
               });
             } catch {}
+            if (!isValid4) {
+              console.warn('[DistrictClick] Skipping setSelectedDistrictId because normalized ID is invalid:', normIdStr, 'name=', districtName);
+              return;
+            }
             bridge.setIsZooming?.(true);
             bridge.setSelectedDistrict?.(districtName);
-            bridge.setSelectedDistrictId?.(normId as any);
+            bridge.setSelectedDistrictId?.(normIdStr as any);
             const map = (e as any).target._map;
             if (map) {
               const bounds = (e as any).target.getBounds();

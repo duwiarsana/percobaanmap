@@ -162,3 +162,24 @@ git push
 - After branch changes, run `git submodule update --init --recursive`.
 - Remotes may use SSH; ensure SSH keys are configured.
 
+
+## Changelog
+
+### 2025-08-22
+
+Behavior-preserving fixes and refactors to stabilize Bali subdistrict loading and reduce ID mismatches:
+
+- __Normalize district IDs to 4 digits__
+  - Added `src/utils/geojsonProps.ts` with `getDistrictId()` that prefers explicit `regency_code`, derives from `district_code`/`village_code`, ignores UUID-like values, and returns a normalized 4-digit code when possible.
+
+- __Click handling hardened__
+  - Updated `src/map/handlers.ts` to prefer config-based IDs via `findDistrictConfig(name)` and only set `selectedDistrictId` when a valid 4-digit code is available. Otherwise, it logs and skips to prevent bad loads.
+
+- __Filtering and subdistrict loading aligned__
+  - `src/App.tsx` now uses `getDistrictId()` when filtering districts after selection to match the click logic.
+  - In subdistrict loading, it prefers the config-based 4-digit ID from `selectedDistrict` name before falling back to numeric normalization.
+
+- __Data pathing__
+  - Maintains per-district Bali paths under `public/data/id51_bali/id510x_<district>/...` with fallbacks to `/data/districts/kab_37.geojson` where appropriate.
+
+These changes fix cases where IDs like `01`, `24`, or feature `gid`/`uuid` values caused subdistricts not to load.
