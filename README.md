@@ -350,3 +350,68 @@ These changes fix cases where IDs like `01`, `24`, or feature `gid`/`uuid` value
 - **Province config generation and registry**
   - Generated 34 province modules under `src/data/prov-<code>-<slug>.ts` using `scripts/gen_province_config.py` with `districtsFile` pointing to the new `kab_<prov>.geojson` files.
   - Updated `src/data/provinces.ts` to import and register all provinces.
+
+### 2025-09-02 — Astro Integration for the React Map
+
+We added an Astro front-end to host the existing React + Leaflet map, enabling a more flexible and performant site structure while preserving current behavior.
+
+— What changed
+
+- **Dependencies and scripts** (`package.json`)
+  - Added dev dependencies: `astro`, `@astrojs/react`.
+  - New scripts: `dev:astro`, `build:astro`, `preview:astro`.
+- **Astro configuration** (`astro.config.mjs`)
+  - Enabled the React integration: `integrations: [react()]`.
+- **Entry page** (`src/pages/index.astro`)
+  - Renders the existing React app component `src/App.tsx` using `client:only="react"` to avoid SSR of Leaflet.
+- **Types** (`src/env.d.ts`)
+  - Adds Astro TypeScript ambient types.
+
+— Rationale
+
+- Leaflet and `react-leaflet` access `window`/`document`. Server-side rendering (SSR) would crash.
+- Using Astro’s `client:only` directive ensures the React app is hydrated only in the browser, avoiding SSR while still benefiting from Astro’s routing and asset pipeline.
+
+— How to run with Astro
+
+```bash
+npm install
+npm run dev:astro
+# Local: http://localhost:4321
+```
+
+— How to build and preview
+
+```bash
+npm run build:astro
+npm run preview:astro
+```
+
+— Data paths remain the same
+
+- Public assets are served from `public/` unchanged. Existing fetches continue to work:
+  - Provinces: `fetch('/data/prov_37.geojson')`
+  - Districts: `fetch('/data/kab_37.geojson')`
+  - Subdistricts (e.g., Bali): `fetch('/data/id51_bali/id5102_tabanan/<file>.geojson')`
+
+— SSR note and troubleshooting
+
+- If you see `window is not defined` or similar SSR errors, confirm the React page is using `client:only`:
+  - `src/pages/index.astro` contains: `<App client:only="react" />`.
+- Ensure no Astro or server-only code directly imports `leaflet` or `react-leaflet` outside of client-only islands.
+- If you need to expose the dev server on your LAN: `npm run dev:astro -- --host`.
+
+— Coexistence with CRA
+
+- The original CRA workflow remains available:
+  - `npm start` (serves on http://localhost:3000)
+- Astro is now the preferred way to serve the app:
+  - `npm run dev:astro` (http://localhost:4321)
+
+— Files added/modified in this change
+
+- `package.json` (scripts and devDependencies)
+- `astro.config.mjs`
+- `src/pages/index.astro`
+- `src/env.d.ts`
+- No changes required to `src/App.tsx` functionality; it is now mounted by Astro.

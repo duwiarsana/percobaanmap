@@ -8,11 +8,12 @@ export const createDistrictStyle = (selectedDistrict: string | null) => {
     const districtName = getDistrictName(props);
     const isSelected = selectedDistrict === districtName;
     return {
-      fillColor: isSelected ? '#f5a623' : '#4a90e2',
-      weight: 1.5,
+      // Softer teal palette for districts; highlight selected slightly warmer
+      fillColor: isSelected ? '#f5b867' : '#9ad3c9',
+      weight: 0.8,
       opacity: 1,
-      color: 'white',
-      fillOpacity: isSelected ? 0.8 : 0.6,
+      color: '#f7f7f7',
+      fillOpacity: isSelected ? 0.72 : 0.55,
     } as PathOptions;
   };
 };
@@ -28,12 +29,13 @@ export const subdistrictStyle = (feature: any) => {
       hash |= 0;
     }
   }
-  const colors = ['#FF5733', '#33FF57', '#3357FF', '#F033FF', '#FF33A8', '#33FFF0', '#F3FF33', '#FF9933'];
+  // Pastel palette for gentler visual tone
+  const colors = ['#A3E4D7', '#F9E79F', '#F5CBA7', '#D7BDE2', '#AED6F1', '#FADBD8', '#ABEBC6', '#FDEBD0'];
   return {
-    weight: 2,
-    opacity: 1.0,
-    color: '#000000',
+    weight: 0.6,
+    opacity: 0.9,
+    color: '#ffffff',
     fillColor: colors[Math.abs(hash) % colors.length],
-    fillOpacity: 0.7,
+    fillOpacity: 0.5,
   } as PathOptions;
 };
